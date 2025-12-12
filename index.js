@@ -559,4 +559,6 @@ if (!nativeBinding) {
 module.exports = nativeBinding
 module.exports.Game = nativeBinding.Game
 module.exports.GameProps = nativeBinding.GameProps
+module.exports.InputProps = nativeBinding.InputProps
 module.exports.JoinProps = nativeBinding.JoinProps
+module.exports.Vector = nativeBinding.Vector

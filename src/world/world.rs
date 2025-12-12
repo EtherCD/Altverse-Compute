@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use crate::{
   network::PackedArea,
   units::player::Player,
@@ -32,49 +30,6 @@ impl World {
   pub fn leave(&mut self, player: &Player) {
     if let Some(area) = self.areas.get_mut(player.area as usize) {
       area.leave(player);
-    }
-  }
-
-  pub fn interact(&mut self, players: &mut HashMap<i64, Player>) {
-    for area in self.areas.iter_mut() {
-      for (_, entity) in area.entities.iter_mut() {
-        for id in area.players.iter() {
-          if let Some(player) = players.get_mut(&id) {
-            entity.interact(player);
-          }
-        }
-      }
-
-      // for fid in area.players.iter() {
-      //   if let Some(first) = players.get_mut(&fid) {
-      //     for sid in area.players.iter() {
-      //       if (fid != sid) {
-      //         for sid in area.players.iter() {
-      //           if let Some(second) = players.get_mut(&sid) {
-      //             if (!first.downed
-      //               && second.downed
-      //               && distance(first.pos.x - second.pos.x, first.pos.y - second.pos.y)
-      //                 <= first.radius + second.radius)
-      //             {
-      //               second.res();
-      //             }
-      //           }
-      //         }
-      //       }
-      //     }
-      //   }
-      // }
-
-      // let players = &mut area.get_players(players);
-      //   for (_, player) in players.iter_mut() {
-      //     entity.interact(player);
-      //   }
-
-      // for (fid, first) in players.iter() {
-      //   for (sid, second) in players {
-      //
-      //   }
-      // }
     }
   }
 

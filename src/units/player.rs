@@ -14,16 +14,16 @@ pub struct Player {
   slide: Vector,
   pub speed: f64,
   pub energy: f64,
-  pub max_energy: i16,
+  pub max_energy: i64,
   pub downed: bool,
   pub regeneration: f32,
   pub world: String,
-  pub area: u32,
+  pub area: u64,
   angle: f64,
   death_timer: f64,
 
   pub immortal: bool,
-  state: u32,
+  state: u64,
   state_meta: f64,
 }
 
@@ -87,46 +87,52 @@ impl Player {
     self.acc = Vector::new(None, None);
   }
 
-  pub fn input(&mut self, input: InputProps) {
-    let shift: f64 = if input.shift.unwrap() { 0.5 } else { 1.0 };
+  pub fn input(&mut self, input: &mut InputProps) {
+    println!("{:?}", input);
+    let shift: f64 = if input.shift { 0.5 } else { 1.0 };
 
-    if input.left.unwrap() {
+    if input.left {
       self.acc.x = -self.speed * shift;
     }
-    if input.right.unwrap() {
+    if input.right {
       self.acc.x = self.speed * shift;
     }
-    if input.up.unwrap() {
+    if input.up {
       self.acc.y = -self.speed * shift;
     }
-    if input.down.unwrap() {
+    if input.down {
       self.acc.y = -self.speed * shift;
     }
-    if input.mouse_enable.unwrap() {
-      match input.mouse_pos {
-        Some(e) => {
-          let dist = distance(e.x, e.y);
-          let mut speed_x = e.x;
-          let mut speed_y = e.y;
+    if input.mouse_enable {
+      let dist = distance(input.mouse_pos_x, input.mouse_pos_y);
+      let mut speed_x = input.mouse_pos_x;
+      let mut speed_y = input.mouse_pos_y;
 
-          if dist > 150.0 {
-            speed_x = e.x * (150.0 / dist);
-            speed_y = e.y * (150.0 / dist);
-          }
-
-          self.angle = speed_y.atan2(speed_x);
-
-          let mouse_dist = (e.x.powf(2.0) - e.y.powf(2.0)).sqrt().min(150.0);
-
-          let mut dist_movement = self.speed * shift;
-          dist_movement *= mouse_dist / 150.0;
-
-          self.acc.x = dist_movement * self.angle.cos();
-          self.acc.y = dist_movement * self.angle.sin();
-        }
-        None => {}
+      if dist > 150.0 {
+        speed_x = input.mouse_pos_x * (150.0 / dist);
+        speed_y = input.mouse_pos_y * (150.0 / dist);
       }
+
+      self.angle = speed_y.atan2(speed_x);
+
+      let mouse_dist = (input.mouse_pos_x.powf(2.0) - input.mouse_pos_y.powf(2.0))
+        .sqrt()
+        .min(150.0);
+
+      let mut dist_movement = self.speed * shift;
+      dist_movement *= mouse_dist / 150.0;
+
+      self.acc.x = dist_movement * self.angle.cos();
+      self.acc.y = dist_movement * self.angle.sin();
     }
+
+    input.left = false;
+    input.right = false;
+    input.up = false;
+    input.down = false;
+    input.mouse_enable = false;
+    input.mouse_pos_x = 0.0;
+    input.mouse_pos_y = 0.0;
   }
 
   pub fn knock(&mut self) {
@@ -157,8 +163,8 @@ impl Player {
     PackedPlayer {
       id: self.id,
       name: self.name.clone(),
-      x: self.pos.x,
-      y: self.pos.y,
+      x: (self.pos.x * 10.0).round() / 10.0,
+      y: (self.pos.y * 10.0).round() / 10.0,
       radius: self.radius,
       speed: self.speed,
       energy: self.energy,

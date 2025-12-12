@@ -114,8 +114,8 @@ impl Entity {
   pub fn pack(&self) -> PackedEntity {
     PackedEntity {
       type_id: self.type_id,
-      x: self.pos.x,
-      y: self.pos.y,
+      x: (self.pos.x * 10.0).round() / 10.0,
+      y: (self.pos.y * 10.0).round() / 10.0,
       radius: self.radius,
       harmless: self.harmless,
       state: self.state,

@@ -56,8 +56,8 @@ const engine = new napi.Game(
           "count": 5
         }
       ],
-      "w": 60,
-      "h": 15
+      "w": 1920,
+      "h": 480
     }
   ]
 }`,
@@ -65,11 +65,18 @@ const engine = new napi.Game(
   ),
 )
 
+function showPackage(packages) {
+  for (pkg in packages) {
+    console.log(util.inspect(JSON.parse(packages[pkg]), false, null, true))
+  }
+}
+
 engine.join(new napi.JoinProps('EtherCD', 0))
-engine.join(new napi.JoinProps('EtherCD', 2))
 
-engine.update()
+let input = new napi.InputProps()
+input.down = true
+input.left = true
+engine.input(0, input)
+showPackage(engine.update())
 
-const pack = JSON.parse(engine.getPackagePerPlayer(2))
-
-console.log(util.inspect(pack, false, null, true))
+showPackage(engine.update())

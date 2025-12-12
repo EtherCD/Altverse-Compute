@@ -6,7 +6,7 @@ pub struct PlayerProps {
   pub name: String,
   pub id: i64,
   pub world: String,
-  pub area: u32,
+  pub area: u64,
 }
 
 pub struct EntityProps {
@@ -36,14 +36,34 @@ pub struct UpdateProps {
   pub time_fix: f64,
 }
 
+#[derive(Clone, Debug)]
+#[napi]
 pub struct InputProps {
-  pub left: Option<bool>,
-  pub right: Option<bool>,
-  pub up: Option<bool>,
-  pub down: Option<bool>,
-  pub shift: Option<bool>,
-  pub mouse_enable: Option<bool>,
-  pub mouse_pos: Option<Vector>,
+  pub left: bool,
+  pub right: bool,
+  pub up: bool,
+  pub down: bool,
+  pub shift: bool,
+  pub mouse_enable: bool,
+  pub mouse_pos_x: f64,
+  pub mouse_pos_y: f64,
+}
+
+#[napi]
+impl InputProps {
+  #[napi(constructor)]
+  pub fn new() -> Self {
+    Self {
+      left: false,
+      right: false,
+      up: false,
+      down: false,
+      shift: false,
+      mouse_enable: false,
+      mouse_pos_x: 0.0,
+      mouse_pos_y: 0.0,
+    }
+  }
 }
 
 pub fn distance(a: f64, b: f64) -> f64 {
@@ -55,8 +75,4 @@ pub struct Boundary {
   pub y: f64,
   pub w: f64,
   pub h: f64,
-}
-
-pub struct GlobalUpdatePackage {
-  pub clients: Vec<(i64, String)>,
 }

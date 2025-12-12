@@ -1,14 +1,17 @@
-use diff::Diff;
+use napi_derive::napi;
 
 use crate::units::random;
 
-#[derive(Diff, Clone)]
+#[derive(Clone)]
+#[napi]
 pub struct Vector {
   pub x: f64,
   pub y: f64,
 }
 
+#[napi]
 impl Vector {
+  #[napi(constructor)]
   pub fn new(x: Option<f64>, y: Option<f64>) -> Self {
     Self {
       x: match x {

@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::{
-  network::PackedEntity,
+  network::{NetworkClient, Package, PackedEntity, PackedPlayer},
   units::{
     entity::Entity,
     player::Player,
@@ -73,10 +73,68 @@ impl Area {
     }
   }
 
-  pub fn update(&mut self, update: &UpdateProps) {
-    for (_, entity) in &mut self.entities {
-      entity.update(update.clone());
+  pub fn update(
+    &mut self,
+    update: &UpdateProps,
+    players: &mut HashMap<i64, Player>,
+    clients: &mut HashMap<i64, NetworkClient>,
+  ) -> Vec<Package> {
+    let mut packages: Vec<Package> = Vec::new();
+
+    let old_entities = self.get_entities().clone();
+    let old_players = self.get_players(players).clone();
+
+    for (_, entity) in self.entities.iter_mut() {
+      for id in self.players.iter() {
+        entity.update(update.clone());
+        if let Some(player) = players.get_mut(&id) {
+          entity.interact(player);
+        }
+      }
     }
+
+    for id in self.players.iter() {
+      if let Some(player) = players.get_mut(id) {
+        if let Some(client) = clients.get_mut(id) {
+          player.input(&mut client.input);
+        }
+        player.update(update);
+        player.collide(self.as_boundary());
+      }
+    }
+
+    let new_entities = self.get_entities();
+    let new_players = self.get_players(players);
+
+    let mut entities_diffs = HashMap::new();
+    let mut players_diffs = HashMap::new();
+
+    for (id, entity) in new_entities {
+      if let Some(old_entity) = old_entities.get(&id) {
+        let diff = old_entity.diff(&entity);
+        if diff.len() > 0 {
+          entities_diffs.insert(id, diff);
+        }
+      }
+    }
+
+    for (id, player) in new_players {
+      if let Some(old_player) = old_players.get(&id) {
+        let diff = player.diff(old_player);
+        if diff.len() > 0 {
+          players_diffs.insert(id, diff);
+        }
+      }
+    }
+
+    if entities_diffs.len() != 0 {
+      packages.push(Package::UpdateEntities(entities_diffs));
+    }
+    if players_diffs.len() != 0 {
+      packages.push(Package::UpdatePlayers(players_diffs));
+    }
+
+    packages
   }
 
   pub fn get_entities(&self) -> HashMap<i64, PackedEntity> {
@@ -84,6 +142,18 @@ impl Area {
 
     for (id, entity) in &self.entities {
       res.insert(*id, entity.pack());
+    }
+
+    res
+  }
+
+  pub fn get_players(&self, players: &HashMap<i64, Player>) -> HashMap<i64, PackedPlayer> {
+    let mut res = HashMap::new();
+
+    for id in &self.players {
+      if let Some(player) = players.get(id) {
+        res.insert(*id, player.pack());
+      }
     }
 
     res

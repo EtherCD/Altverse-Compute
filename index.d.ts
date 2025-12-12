@@ -4,16 +4,34 @@ export declare class Game {
   constructor(props: GameProps)
   join(props: JoinProps): void
   leave(id: number): void
-  update(): void
-  getPackagePerPlayer(id: number): string
+  input(id: number, input: InputProps): void
+  update(): object
 }
 
 export declare class GameProps {
   constructor(config: string, worlds: Array<string>)
 }
 
+export declare class InputProps {
+  left: boolean
+  right: boolean
+  up: boolean
+  down: boolean
+  shift: boolean
+  mouseEnable: boolean
+  mousePosX: number
+  mousePosY: number
+  constructor()
+}
+
 export declare class JoinProps {
   name: string
   id: number
   constructor(name: string, id: number)
+}
+
+export declare class Vector {
+  x: number
+  y: number
+  constructor(x?: number | undefined | null, y?: number | undefined | null)
 }
