@@ -2,7 +2,7 @@ use napi_derive::napi;
 
 use crate::units::random;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 #[napi]
 pub struct Vector {
   pub x: f64,

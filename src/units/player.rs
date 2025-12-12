@@ -1,4 +1,5 @@
 use crate::{
+  CONFIG,
   network::PackedPlayer,
   units::{structures::*, vector::Vector},
 };
@@ -29,21 +30,22 @@ pub struct Player {
 
 impl Player {
   pub fn new(props: PlayerProps) -> Player {
+    let spawn = CONFIG.lock().unwrap().clone().spawn;
     Player {
       name: props.name,
       id: props.id,
-      pos: Vector::new(None, None),
-      radius: 15.0,
+      pos: Vector::rand(spawn.sx, spawn.sy, spawn.ex, spawn.ey),
+      radius: spawn.radius,
       vel: Vector::new(None, None),
       acc: Vector::new(None, None),
       slide: Vector::new(None, None),
-      speed: 17.0,
-      energy: 30.0,
-      max_energy: 30,
+      speed: spawn.speed,
+      energy: spawn.energy,
+      max_energy: spawn.max_energy as i64,
       downed: false,
-      regeneration: 1.0,
+      regeneration: spawn.regeneration as f32,
       angle: 0.0,
-      death_timer: 60.0,
+      death_timer: spawn.died_timer,
       immortal: false,
       state: 0,
       state_meta: 0.0,
@@ -87,8 +89,7 @@ impl Player {
     self.acc = Vector::new(None, None);
   }
 
-  pub fn input(&mut self, input: &mut InputProps) {
-    println!("{:?}", input);
+  pub fn input(&mut self, input: &InputProps) {
     let shift: f64 = if input.shift { 0.5 } else { 1.0 };
 
     if input.left {
@@ -101,7 +102,7 @@ impl Player {
       self.acc.y = -self.speed * shift;
     }
     if input.down {
-      self.acc.y = -self.speed * shift;
+      self.acc.y = self.speed * shift;
     }
     if input.mouse_enable {
       let dist = distance(input.mouse_pos_x, input.mouse_pos_y);
@@ -125,14 +126,6 @@ impl Player {
       self.acc.x = dist_movement * self.angle.cos();
       self.acc.y = dist_movement * self.angle.sin();
     }
-
-    input.left = false;
-    input.right = false;
-    input.up = false;
-    input.down = false;
-    input.mouse_enable = false;
-    input.mouse_pos_x = 0.0;
-    input.mouse_pos_y = 0.0;
   }
 
   pub fn knock(&mut self) {
@@ -146,16 +139,16 @@ impl Player {
 
   pub fn collide(&mut self, boundary: Boundary) {
     if self.pos.x - self.radius < boundary.x {
-      self.pos.x = self.radius - boundary.x;
-    }
-    if self.pos.y - self.radius < boundary.y {
-      self.pos.y = self.radius - boundary.y;
+      self.pos.x = boundary.x + self.radius;
     }
     if self.pos.x + self.radius > boundary.x + boundary.w {
-      self.pos.x = self.radius + boundary.x;
+      self.pos.x = boundary.x + boundary.w - self.radius;
+    }
+    if self.pos.y - self.radius < boundary.y {
+      self.pos.y = boundary.y + self.radius;
     }
     if self.pos.y + self.radius > boundary.y + boundary.h {
-      self.pos.y = self.radius + boundary.y;
+      self.pos.y = boundary.y + boundary.h - self.radius;
     }
   }
 

@@ -1,22 +1,24 @@
 #![deny(clippy::all)]
 
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::Mutex};
 
 use crate::{
   config::Config,
-  network::{NetworkClient, Package, PackedPlayer},
+  network::{NetworkClient, Package},
   structures::GameProps,
   units::{
     player::Player,
     structures::{InputProps, JoinProps, PlayerProps, UpdateProps},
-    vector::Vector,
   },
   world::world::World,
 };
 use chrono::Utc;
+use lazy_static::lazy_static;
+use lz4_compression::prelude::compress;
+use lz4_flex::frame::FrameEncoder;
 use napi::{
   Env, Error, Status,
-  bindgen_prelude::{JsObjectValue, Object},
+  bindgen_prelude::{Buffer, BufferSlice, JsObjectValue, Object, Uint8Array, Uint8ArraySlice},
 };
 use napi_derive::napi;
 
@@ -25,6 +27,10 @@ mod network;
 mod structures;
 mod units;
 mod world;
+
+lazy_static! {
+  pub static ref CONFIG: Mutex<Config> = Mutex::new(Config::new());
+}
 
 #[napi]
 pub struct Game {
@@ -40,6 +46,11 @@ impl Game {
   #[napi(constructor)]
   pub fn new(props: &GameProps) -> Result<Game, Error> {
     let worlds = props.load_worlds();
+    let config = match props.load_config() {
+      Ok(cfg) => cfg,
+      Err(e) => return Err(Error::new(Status::InvalidArg, e.to_string())),
+    };
+    *CONFIG.lock().unwrap() = config.clone();
     match worlds {
       Ok(worlds) => {
         return Ok(Game {
@@ -47,10 +58,7 @@ impl Game {
           last_timestamp: Utc::now().timestamp_millis(),
           worlds: worlds,
           clients: HashMap::new(),
-          config: match props.load_config() {
-            Ok(cfg) => cfg,
-            Err(e) => return Err(Error::new(Status::InvalidArg, e.to_string())),
-          },
+          config,
         });
       }
       Err(e) => Err(Error::new(Status::InvalidArg, e.to_string())),
@@ -94,10 +102,10 @@ impl Game {
   pub fn input(&mut self, id: i64, input: &InputProps) -> Result<(), Error> {
     if let Some(client) = self.clients.get_mut(&id) {
       client.input = input.clone();
-      println!("{:?}", input);
       return Ok(());
     } else {
-      Err(Error::new(Status::InvalidArg, "The client will not find"))
+      Ok(())
+      // Err(Error::new(Status::InvalidArg, "The client will not find"))
     }
   }
 
@@ -135,10 +143,14 @@ impl Game {
 
     for (index, client) in self.clients.iter_mut() {
       let key = env.create_string(index.to_string())?;
-      if let Ok(string) = serde_json::to_string(&client.packages) {
-        let value = env.create_string(string)?;
-        object.set_property(key, value)?;
-        client.packages.clear();
+      if let Ok(_) = serde_json::to_string(&client.packages) {
+        let mut compressor = FrameEncoder::new(Vec::new());
+        serde_json::to_writer(&mut compressor, &client.packages).unwrap();
+        if let Ok(buffer) = compressor.finish() {
+          let uint8 = Uint8ArraySlice::from_data(env, buffer)?;
+          object.set_property(key, uint8)?;
+          client.packages.clear();
+        }
       }
     }
 

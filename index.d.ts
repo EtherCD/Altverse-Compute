@@ -22,6 +22,14 @@ export declare class InputProps {
   mousePosX: number
   mousePosY: number
   constructor()
+  setLeft(val: boolean): void
+  setRight(val: boolean): void
+  setUp(val: boolean): void
+  setDown(val: boolean): void
+  setShift(val: boolean): void
+  setMouseEnable(val: boolean): void
+  setMousePosX(val: number): void
+  setMousePosY(val: number): void
 }
 
 export declare class JoinProps {

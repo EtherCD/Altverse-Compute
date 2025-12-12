@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use crate::{
+  CONFIG,
   network::{NetworkClient, Package, PackedEntity, PackedPlayer},
   units::{
     entity::Entity,
@@ -40,7 +41,10 @@ impl Area {
   }
 
   pub fn leave(&mut self, player: &Player) {
-    self.players.remove(player.id as usize);
+    let id = player.id as usize;
+    if let Some(_) = self.players.get(id) {
+      self.players.remove(id);
+    }
     if self.players.len() == 0 {
       self.entities = HashMap::new();
     }
@@ -81,8 +85,8 @@ impl Area {
   ) -> Vec<Package> {
     let mut packages: Vec<Package> = Vec::new();
 
-    let old_entities = self.get_entities().clone();
-    let old_players = self.get_players(players).clone();
+    let old_entities = self.get_entities();
+    let old_players = self.get_players(players);
 
     for (_, entity) in self.entities.iter_mut() {
       for id in self.players.iter() {
@@ -96,10 +100,10 @@ impl Area {
     for id in self.players.iter() {
       if let Some(player) = players.get_mut(id) {
         if let Some(client) = clients.get_mut(id) {
-          player.input(&mut client.input);
+          player.input(&client.input);
         }
         player.update(update);
-        player.collide(self.as_boundary());
+        player.collide(self.as_boundary_player());
       }
     }
 
@@ -164,6 +168,15 @@ impl Area {
       x: 0.0,
       y: 0.0,
       w: self.w,
+      h: self.h,
+    };
+  }
+
+  pub fn as_boundary_player(&self) -> Boundary {
+    return Boundary {
+      x: -10.0 * 32.0,
+      y: 0.0,
+      w: self.w + 20.0 * 32.0,
       h: self.h,
     };
   }

@@ -82,20 +82,20 @@ impl Entity {
 
   pub fn collide(&mut self) {
     if self.pos.x - self.radius < self.boundary.x {
-      self.pos.x = self.radius + self.boundary.x;
-      self.vel.x = self.vel.x.abs();
+      self.pos.x = self.boundary.x + self.radius;
+      self.vel.x = self.vel.x.abs()
     }
-    if self.pos.y - self.radius < self.boundary.h {
-      self.pos.y = self.radius + self.boundary.h;
-      self.vel.y = self.vel.y.abs();
-    }
-    if self.pos.x - self.radius > self.boundary.x + self.boundary.w {
+    if self.pos.x + self.radius > self.boundary.x + self.boundary.w {
       self.pos.x = self.boundary.x + self.boundary.w - self.radius;
-      self.vel.x = self.vel.x.abs();
+      self.vel.x = -(self.vel.x.abs())
     }
-    if self.pos.y - self.radius > self.boundary.y + self.boundary.h {
-      self.pos.y = self.boundary.y + self.boundary.h - self.radius;
+    if self.pos.y - self.radius < self.boundary.y {
+      self.pos.y = self.boundary.y + self.radius;
       self.vel.y = self.vel.y.abs();
+    }
+    if self.pos.y + self.radius > self.boundary.y + self.boundary.h {
+      self.pos.y = self.boundary.y + self.boundary.h - self.radius;
+      self.vel.y = -(self.vel.y.abs());
     }
   }
 

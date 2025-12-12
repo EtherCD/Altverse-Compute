@@ -12,5 +12,8 @@ thread_local! {
 }
 
 pub fn random(min: f64, max: f64) -> f64 {
-  RNG.with(|rng| rng.borrow_mut().random::<f64>()) * (max - min) + min
+  RNG.with(|rng| {
+    let r: f64 = rng.borrow_mut().random::<f64>();
+    r * (max - min) + min
+  })
 }

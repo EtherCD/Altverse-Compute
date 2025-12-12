@@ -64,6 +64,45 @@ impl InputProps {
       mouse_pos_y: 0.0,
     }
   }
+  #[napi]
+  pub fn set_left(&mut self, val: bool) {
+    self.left = val;
+  }
+
+  #[napi]
+  pub fn set_right(&mut self, val: bool) {
+    self.right = val;
+  }
+
+  #[napi]
+  pub fn set_up(&mut self, val: bool) {
+    self.up = val;
+  }
+
+  #[napi]
+  pub fn set_down(&mut self, val: bool) {
+    self.down = val;
+  }
+
+  #[napi]
+  pub fn set_shift(&mut self, val: bool) {
+    self.shift = val;
+  }
+
+  #[napi]
+  pub fn set_mouse_enable(&mut self, val: bool) {
+    self.mouse_enable = val;
+  }
+
+  #[napi]
+  pub fn set_mouse_pos_x(&mut self, val: f64) {
+    self.mouse_pos_x = val;
+  }
+
+  #[napi]
+  pub fn set_mouse_pos_y(&mut self, val: f64) {
+    self.mouse_pos_y = val;
+  }
 }
 
 pub fn distance(a: f64, b: f64) -> f64 {
