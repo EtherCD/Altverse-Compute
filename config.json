@@ -1,0 +1,17 @@
+{
+  "radius": 15,
+  "speed": 17,
+  "max_speed": 17,
+  "regeneration": 1,
+  "energy": 20,
+  "max_energy": 20,
+  "world": "Celestial Canyon",
+  "area": 0,
+
+  "sx": 2,
+  "sy": 2,
+  "ex": 2,
+  "ey": 2,
+
+  "died_timer": 2
+}
