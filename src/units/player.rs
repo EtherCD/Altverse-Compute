@@ -116,7 +116,7 @@ impl Player {
 
       self.angle = speed_y.atan2(speed_x);
 
-      let mouse_dist = (input.mouse_pos_x.powf(2.0) - input.mouse_pos_y.powf(2.0))
+      let mouse_dist = (input.mouse_pos_x.powf(2.0) + input.mouse_pos_y.powf(2.0))
         .sqrt()
         .min(150.0);
 
@@ -164,7 +164,7 @@ impl Player {
       max_energy: self.max_energy,
       death_timer: self.death_timer,
       state: self.state,
-      area: self.area,
+      area: self.area.clone(),
       world: self.world.clone(),
       died: self.downed,
       state_meta: self.state_meta,

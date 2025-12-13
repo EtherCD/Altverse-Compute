@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use crate::{
-  CONFIG,
   network::{NetworkClient, Package, PackedEntity, PackedPlayer},
   units::{
     entity::Entity,
@@ -37,16 +36,17 @@ impl Area {
     if self.players.len() == 0 {
       self.init();
     }
+    println!("Join");
     self.players.push(player.id);
   }
 
-  pub fn leave(&mut self, player: &Player) {
-    let id = player.id as usize;
+  pub fn leave(&mut self, id: usize) {
     if let Some(_) = self.players.get(id) {
       self.players.remove(id);
+      println!("Leave");
     }
     if self.players.len() == 0 {
-      self.entities = HashMap::new();
+      self.entities.clear();
     }
   }
 
@@ -89,8 +89,8 @@ impl Area {
     let old_players = self.get_players(players);
 
     for (_, entity) in self.entities.iter_mut() {
+      entity.update(update.clone());
       for id in self.players.iter() {
-        entity.update(update.clone());
         if let Some(player) = players.get_mut(&id) {
           entity.interact(player);
         }

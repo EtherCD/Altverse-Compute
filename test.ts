@@ -10,9 +10,9 @@ const engine = new ge.Game(
   "radius": 15,
   "speed": 17,
   "max_speed": 17,
-  "regeneration": 1,
-  "energy": 20,
-  "max_energy": 20,
+  "regeneration": 7,
+  "energy": 0,
+  "max_energy": 30,
   "world": "Celestial Canyon",
   "area": 0,
 
@@ -22,7 +22,8 @@ const engine = new ge.Game(
   "ey": 401,
 
   "died_timer": 2
-}
+},
+    "worlds": ["Celestial Canyon", "Full Function"]
   }
     `,
     [
@@ -35,6 +36,92 @@ const engine = new ge.Game(
   },
   "name": "Celestial Canyon",
   "areas": [
+    {
+      "enemies": [
+        {
+          "types": ["flame", "homing_sniper", "sniper"],
+          "radius": 15,
+          "speed": 5,
+          "count": 10
+        },
+        {
+          "types": ["tree"],
+          "radius": 30,
+          "speed": 0,
+          "count": 2,
+          "aura": 400
+        },
+        {
+          "types": ["wall"],
+          "radius": 30,
+          "speed": 5,
+          "count": 5
+        }
+      ],
+      "w": 1920,
+      "h": 480
+    },
+    {
+      "enemies": [
+        {
+          "types": ["flame", "homing_sniper", "sniper"],
+          "radius": 15,
+          "speed": 5,
+          "count": 10
+        },
+        {
+          "types": ["tree"],
+          "radius": 30,
+          "speed": 0,
+          "count": 2,
+          "aura": 400
+        },
+        {
+          "types": ["wall"],
+          "radius": 30,
+          "speed": 5,
+          "count": 5
+        }
+      ],
+      "w": 1920,
+      "h": 480
+    }
+  ]
+}`,
+      `
+  {
+  "client": {
+    "fillStyle": "#b3cde0",
+    "strokeStyle": "#011f4b",
+    "areaFill": "#011f4b"
+  },
+  "name": "Full Function",
+  "areas": [
+    {
+      "enemies": [
+        {
+          "types": ["flame", "homing_sniper", "sniper"],
+          "radius": 15,
+          "speed": 5,
+          "count": 10
+        },
+        {
+          "types": ["tree"],
+          "radius": 30,
+          "speed": 0,
+          "count": 2,
+          "aura": 400
+        },
+        {
+          "types": ["wall"],
+          "radius": 30,
+          "speed": 5,
+          "count": 5
+        }
+      ],
+      "w": 1920,
+      "h": 480
+    },
     {
       "enemies": [
         {
@@ -116,7 +203,7 @@ App()
                 input.setUp(false)
                 break
               case 'shift':
-                input.setShift(true)
+                input.setShift(false)
                 break
             }
             break
@@ -143,9 +230,13 @@ App()
             engine.join(new ge.JoinProps('EtherCD', client.id))
             break
           case 'mousePos':
+            const pos = data[i]
+            input.setMousePosX(pos[0])
+            input.setMousePosY(pos[1])
             // mousePos(ws, data.mousePos!)
             break
           case 'mouseEnable':
+            input.setMouseEnable(data[i])
             // mouseEnable(ws, data.mouseEnable!)
             break
           case 'ability':
@@ -165,18 +256,20 @@ App()
   })
   .listen(8080, () => {
     console.info(`
- ____  _  _   __   ____  ____  ____    ____       
-(  __)/ )( \\ / _\\ (    \\(  __)/ ___)  (  _ \\      
- ) _) \\ \\/ //    \\ ) D ( ) _) \\___ \\   )   /      
-(____) \\__/ \\_/\\_/(____/(____)(____/  (__\\_)      
+   ___   ____                      
+  / _ | / / /__  _____ _______ ___ 
+ / __ |/ / __/ |/ / -_) __(_-</ -_)
+/_/ |_/_/\\__/|___/\\__/_/ /___/\\__/ 
   `)
 
     console.log('Started at 8080')
   })
 
-setInterval(() => {
+let timeout: NodeJS.Timeout
+
+const tick = () => {
+  clearTimeout(timeout)
   for (const index in clientsInput) {
-    console.log(clientsInput[index])
     engine.input(Number(index), clientsInput[index])
   }
   const packages = engine.update() as Record<string, Buffer>
@@ -187,4 +280,8 @@ setInterval(() => {
       if (pkg.length != 0) client.send(pkg, true)
     }
   }
-}, 1000 / 60)
+
+  timeout = setTimeout(tick, 1000 / 60)
+}
+
+tick()

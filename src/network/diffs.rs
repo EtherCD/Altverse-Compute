@@ -69,6 +69,7 @@ impl PackedPlayer {
       diff.insert("stateMeta".to_string(), Value::from(new.state_meta));
     }
     if self.area != new.area {
+      println!("{}", new.area);
       diff.insert("area".to_string(), Value::from(new.area));
     }
     if self.world != new.world {

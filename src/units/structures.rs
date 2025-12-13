@@ -1,7 +1,5 @@
 use napi_derive::napi;
 
-use crate::units::vector::Vector;
-
 pub struct PlayerProps {
   pub name: String,
   pub id: i64,

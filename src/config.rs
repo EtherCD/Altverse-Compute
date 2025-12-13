@@ -1,11 +1,12 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Config {
   pub spawn: Spawn,
+  pub worlds: Vec<String>,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Spawn {
   pub radius: f64,
   pub speed: f64,
@@ -42,6 +43,7 @@ impl Config {
         ey: 15.0 * 32.0 - 15.0 - 2.0 * 32.0,
         died_timer: 60.0,
       },
+      worlds: Vec::new(),
     }
   }
 }
