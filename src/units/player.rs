@@ -26,6 +26,7 @@ pub struct Player {
   pub immortal: bool,
   state: u64,
   state_meta: f64,
+  to_delete: bool,
 }
 
 impl Player {
@@ -51,6 +52,7 @@ impl Player {
       state_meta: 0.0,
       world: props.world,
       area: props.area,
+      to_delete: false,
     }
   }
 
@@ -89,6 +91,10 @@ impl Player {
     self.acc = Vector::new(None, None);
 
     self.regenerate_energy(props.delta);
+    self.death_timer -= props.delta as f64 / 1000.0;
+    if self.death_timer < 0.0 {
+      self.to_delete = true;
+    }
   }
 
   fn regenerate_energy(&mut self, delta: i64) {
@@ -171,7 +177,7 @@ impl Player {
       speed: self.speed,
       energy: self.energy,
       max_energy: self.max_energy,
-      death_timer: self.death_timer,
+      death_timer: self.death_timer.round(),
       state: self.state,
       area: self.area.clone(),
       world: self.world.clone(),

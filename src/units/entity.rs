@@ -1,6 +1,7 @@
 use std::f32::consts::PI;
 
 use crate::{
+  assets::entity::Enemies,
   network::PackedEntity,
   units::{
     player::Player,
@@ -22,11 +23,14 @@ pub struct Entity {
   pub vel: Vector,
   pub to_remove: bool,
   pub friction: f64,
+  pub aura: f64,
   pub boundary: Boundary,
 
-  state: u64,
-  state_metadata: f64,
-  alpha: f64,
+  pub state: u64,
+  pub state_metadata: f64,
+  pub alpha: f64,
+
+  pub nested_entities: Vec<Enemies>,
 }
 
 impl Entity {
@@ -53,6 +57,8 @@ impl Entity {
       state: 0,
       state_metadata: 0.0,
       alpha: 1.0,
+      aura: 0.0,
+      nested_entities: Vec::new(),
     }
   }
 
@@ -122,6 +128,7 @@ impl Entity {
       radius: self.radius,
       harmless: self.harmless,
       state: self.state,
+      aura: self.aura,
       state_metadata: self.state_metadata,
       alpha: self.alpha,
     }

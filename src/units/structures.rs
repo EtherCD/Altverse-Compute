@@ -2,7 +2,10 @@ use std::collections::HashMap;
 
 use napi_derive::napi;
 
-use crate::units::player::Player;
+use crate::{
+  units::{entity::Entity, player::Player},
+  world::area::Area,
+};
 
 pub struct PlayerProps {
   pub name: String,
@@ -63,6 +66,8 @@ pub struct InputProps {
   pub mouse_enable: bool,
   pub mouse_pos_x: f64,
   pub mouse_pos_y: f64,
+  pub first_ability: bool,
+  pub second_ability: bool,
 }
 
 #[napi]
@@ -78,6 +83,8 @@ impl InputProps {
       mouse_enable: false,
       mouse_pos_x: 0.0,
       mouse_pos_y: 0.0,
+      first_ability: false,
+      second_ability: false,
     }
   }
   #[napi]
@@ -118,6 +125,16 @@ impl InputProps {
   #[napi]
   pub fn set_mouse_pos_y(&mut self, val: f64) {
     self.mouse_pos_y = val;
+  }
+
+  #[napi]
+  pub fn set_first_ability(&mut self, val: bool) {
+    self.first_ability = val;
+  }
+
+  #[napi]
+  pub fn set_second_ability(&mut self, val: bool) {
+    self.second_ability = val;
   }
 }
 

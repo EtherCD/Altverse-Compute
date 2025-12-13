@@ -15,19 +15,13 @@
           "count": 10
         },
         {
-          "types": ["normal"],
-          "radius": 30,
-          "speed": 5,
-          "count": 5
-        },
-        {
           "types": ["immune"],
           "radius": 30,
           "speed": 5,
           "count": 5
         },
         {
-          "types": ["changer"],
+          "types": ["sniper", "pull"],
           "radius": 30,
           "speed": 5,
           "count": 5

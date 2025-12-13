@@ -1,11 +1,12 @@
 use crate::{
-  assets::enemy::Enemy,
+  assets::{enemy::Enemy, entity::Enemies},
   units::{
     entity::Entity,
     structures::{AdditionalEntityProps, EntityProps},
   },
 };
 
+#[derive(Clone)]
 pub struct ChangerEntity {
   entity: Entity,
   disable: bool,
@@ -50,5 +51,17 @@ impl Enemy for ChangerEntity {
 
   fn pack(&self) -> crate::network::PackedEntity {
     self.entity.pack()
+  }
+
+  fn is_to_remove(&self) -> bool {
+    self.entity.to_remove
+  }
+
+  fn get_nested_entities(&self) -> Vec<Enemies> {
+    return self.entity.nested_entities.clone();
+  }
+
+  fn clear_nested_entities(&mut self) {
+    self.entity.nested_entities.clear()
   }
 }

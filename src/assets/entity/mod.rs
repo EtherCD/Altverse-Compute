@@ -4,12 +4,14 @@ use crate::{
   assets::{
     enemy::Enemy,
     entity::{
-      changer::ChangerEntity, homing::HomingEntity, immune::ImmuneEntity, normal::NormalEntity,
+      bullet::BulletEntity, changer::ChangerEntity, homing::HomingEntity, immune::ImmuneEntity,
+      normal::NormalEntity, pull::PullEntity, sniper::SniperEntity, vortex::VortexEntity,
       wall::WallEntity,
     },
   },
   network::PackedEntity,
   units::{
+    entity::Entity,
     player::Player,
     structures::{AdditionalEntityProps, EntityProps, EntityUpdateProps},
   },
@@ -23,22 +25,35 @@ macro_rules! enemy_dispatch {
       Enemies::Immune(v) => v.$method($($arg),*),
       Enemies::Changer(v) => v.$method($($arg),*),
       Enemies::Homing(v) => v.$method($($arg),*),
+      Enemies::Vortex(v) => v.$method($($arg),*),
+      Enemies::Pull(v) => v.$method($($arg),*),
+      Enemies::Sniper(v) => v.$method($($arg),*),
+      Enemies::Bullet(v) => v.$method($($arg),*),
     }
   };
 }
 
+pub mod bullet;
 pub mod changer;
 pub mod homing;
 pub mod immune;
 pub mod normal;
+pub mod pull;
+pub mod sniper;
+pub mod vortex;
 pub mod wall;
 
+#[derive(Clone)]
 pub enum Enemies {
   Normal(NormalEntity),
   Wall(WallEntity),
   Immune(ImmuneEntity),
   Changer(ChangerEntity),
   Homing(HomingEntity),
+  Vortex(VortexEntity),
+  Pull(PullEntity),
+  Sniper(SniperEntity),
+  Bullet(BulletEntity),
 }
 
 impl Enemies {
@@ -68,6 +83,18 @@ impl Enemies {
         props.type_id = 9;
         Ok(Enemies::Homing(HomingEntity::new(*props, additional)))
       }
+      "vortex" => {
+        props.type_id = 10;
+        Ok(Enemies::Vortex(VortexEntity::new(*props, additional)))
+      }
+      "pull" => {
+        props.type_id = 22;
+        Ok(Enemies::Pull(PullEntity::new(*props, additional)))
+      }
+      "sniper" => {
+        props.type_id = 3;
+        Ok(Enemies::Sniper(SniperEntity::new(*props, additional)))
+      }
       _ => Err(Error::new(
         Status::InvalidArg,
         "Unknown enemy type: ".to_string() + name,
@@ -85,5 +112,17 @@ impl Enemies {
 
   pub fn pack(&self) -> PackedEntity {
     enemy_dispatch!(self, pack())
+  }
+
+  pub fn is_to_remove(&self) -> bool {
+    enemy_dispatch!(self, is_to_remove())
+  }
+
+  pub fn get_nested_entities(&self) -> Vec<Enemies> {
+    enemy_dispatch!(self, get_nested_entities())
+  }
+
+  pub fn clear_nested_entities(&mut self) {
+    enemy_dispatch!(self, clear_nested_entities())
   }
 }

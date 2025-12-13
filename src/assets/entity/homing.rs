@@ -1,5 +1,5 @@
 use crate::{
-  assets::enemy::Enemy,
+  assets::{enemy::Enemy, entity::Enemies},
   units::{
     entity::Entity,
     player::Player,
@@ -10,6 +10,7 @@ use crate::{
 const MAX_DIST: f64 = 5.625 * 32.0;
 const ANGLE_INCREMENT: f64 = 0.04;
 
+#[derive(Clone)]
 pub struct HomingEntity {
   entity: Entity,
 }
@@ -69,5 +70,17 @@ impl Enemy for HomingEntity {
 
   fn pack(&self) -> crate::network::PackedEntity {
     self.entity.pack()
+  }
+
+  fn is_to_remove(&self) -> bool {
+    self.entity.to_remove
+  }
+
+  fn get_nested_entities(&self) -> Vec<Enemies> {
+    return self.entity.nested_entities.clone();
+  }
+
+  fn clear_nested_entities(&mut self) {
+    self.entity.nested_entities.clear()
   }
 }

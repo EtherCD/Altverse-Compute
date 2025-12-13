@@ -21,6 +21,8 @@ export declare class InputProps {
   mouseEnable: boolean
   mousePosX: number
   mousePosY: number
+  firstAbility: boolean
+  secondAbility: boolean
   constructor()
   setLeft(val: boolean): void
   setRight(val: boolean): void
@@ -30,6 +32,8 @@ export declare class InputProps {
   setMouseEnable(val: boolean): void
   setMousePosX(val: number): void
   setMousePosY(val: number): void
+  setFirstAbility(val: boolean): void
+  setSecondAbility(val: boolean): void
 }
 
 export declare class JoinProps {

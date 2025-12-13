@@ -17,7 +17,7 @@ use lazy_static::lazy_static;
 use lz4_flex::{compress_prepend_size, frame::FrameEncoder};
 use napi::{
   Env, Error, Status,
-  bindgen_prelude::{JsObjectValue, Object, Uint8ArraySlice},
+  bindgen_prelude::{Function, JsObjectValue, Object, Uint8ArraySlice},
 };
 use napi_derive::napi;
 

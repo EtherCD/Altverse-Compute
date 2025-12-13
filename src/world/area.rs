@@ -4,9 +4,12 @@ use crate::{
   assets::entity::Enemies,
   network::{NetworkClient, Package, PackedEntity, PackedPlayer},
   units::{
+    entity::Entity,
     player::Player,
     random,
-    structures::{AdditionalEntityProps, Boundary, EntityProps, EntityUpdateProps, UpdateProps},
+    structures::{
+      AdditionalEntityProps, Boundary, EntityProps, EntityUpdateProps, UpdateProps, distance,
+    },
   },
   world::RawArea,
 };
@@ -97,8 +100,23 @@ impl Area {
       players: self.get_players_vec(players),
     };
 
-    for (_, entity) in self.entities.iter_mut() {
+    let mut nested_enemies = Vec::new();
+
+    for (id, entity) in self.entities.iter_mut() {
       entity.update(&entity_update);
+      for nested in entity.get_nested_entities() {
+        nested_enemies.push(nested);
+      }
+      entity.clear_nested_entities();
+    }
+
+    let mut new_entities_created: HashMap<i64, PackedEntity> = HashMap::new();
+
+    let mut entities_to_remove = Vec::new();
+
+    for enemy in nested_enemies {
+      new_entities_created.insert(self.next_id, enemy.clone().pack());
+      self.add_entity(enemy);
     }
 
     for (_, entity) in self.entities.iter_mut() {
@@ -109,6 +127,12 @@ impl Area {
       }
     }
 
+    for (id, entity) in self.entities.iter() {
+      if entity.is_to_remove() {
+        entities_to_remove.push(*id);
+      }
+    }
+
     for id in self.players.iter() {
       if let Some(player) = players.get_mut(id) {
         if let Some(client) = clients.get_mut(id) {
@@ -116,6 +140,25 @@ impl Area {
         }
         player.update(update);
         player.collide(self.as_boundary_player());
+      }
+    }
+
+    for first_id in self.players.iter() {
+      for second_id in self.players.iter() {
+        if first_id != second_id {
+          let first_player = players.get(first_id).unwrap();
+          let second_player = players.get(second_id).unwrap();
+          if second_player.downed
+            && first_id != second_id
+            && distance(
+              second_player.pos.x - first_player.pos.x,
+              second_player.pos.y - first_player.pos.y,
+            ) <= first_player.radius + second_player.radius
+          {
+            let second_player = players.get_mut(second_id).unwrap();
+            second_player.res();
+          }
+        }
       }
     }
 
@@ -136,11 +179,23 @@ impl Area {
 
     for (id, player) in new_players {
       if let Some(old_player) = old_players.get(&id) {
-        let diff = player.diff(old_player);
+        let diff = old_player.diff(&player);
         if diff.len() > 0 {
           players_diffs.insert(id, diff);
         }
       }
+    }
+
+    if &new_entities_created.len() > &(0 as usize) {
+      packages.push(Package::NewEntities(new_entities_created))
+    }
+
+    for i in entities_to_remove.iter() {
+      self.entities.remove(i);
+    }
+
+    if &entities_to_remove.len() > &(0 as usize) {
+      packages.push(Package::CloseEntities(entities_to_remove));
     }
 
     if entities_diffs.len() != 0 {
@@ -151,6 +206,11 @@ impl Area {
     }
 
     packages
+  }
+
+  fn add_entity(&mut self, entity: Enemies) {
+    self.entities.insert(self.next_id, entity);
+    self.next_id += 1;
   }
 
   pub fn get_entities(&self) -> HashMap<i64, PackedEntity> {

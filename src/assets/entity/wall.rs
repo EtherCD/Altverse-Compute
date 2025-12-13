@@ -1,5 +1,5 @@
 use crate::{
-  assets::enemy::Enemy,
+  assets::{enemy::Enemy, entity::Enemies},
   units::{
     entity::Entity,
     structures::{AdditionalEntityProps, Boundary, EntityProps},
@@ -7,6 +7,7 @@ use crate::{
   },
 };
 
+#[derive(Clone)]
 pub struct WallEntity {
   entity: Entity,
   dir_act: i64,
@@ -128,5 +129,17 @@ impl Enemy for WallEntity {
 
   fn pack(&self) -> crate::network::PackedEntity {
     self.entity.pack()
+  }
+
+  fn is_to_remove(&self) -> bool {
+    self.entity.to_remove
+  }
+
+  fn get_nested_entities(&self) -> Vec<Enemies> {
+    return self.entity.nested_entities.clone();
+  }
+
+  fn clear_nested_entities(&mut self) {
+    self.entity.nested_entities.clear()
   }
 }
