@@ -6,7 +6,7 @@ use crate::{
   units::{
     player::Player,
     random,
-    structures::{AdditionalEntityProps, Boundary, EntityProps, UpdateProps},
+    structures::{AdditionalEntityProps, Boundary, EntityProps, EntityUpdateProps, UpdateProps},
   },
   world::RawArea,
 };
@@ -91,8 +91,17 @@ impl Area {
     let old_entities = self.get_entities();
     let old_players = self.get_players(players);
 
+    let entity_update = EntityUpdateProps {
+      delta: update.delta,
+      time_fix: update.time_fix,
+      players: self.get_players_vec(players),
+    };
+
     for (_, entity) in self.entities.iter_mut() {
-      entity.update(update.clone());
+      entity.update(&entity_update);
+    }
+
+    for (_, entity) in self.entities.iter_mut() {
       for id in self.players.iter() {
         if let Some(player) = players.get_mut(&id) {
           entity.interact(player);
@@ -152,6 +161,18 @@ impl Area {
     }
 
     res
+  }
+
+  pub fn get_players_vec<'a>(&self, players: &'a HashMap<i64, Player>) -> Vec<&'a Player> {
+    let mut arr: Vec<&Player> = Vec::new();
+
+    for id in &self.players {
+      if let Some(player) = players.get(id) {
+        arr.push(player);
+      }
+    }
+
+    return arr;
   }
 
   pub fn get_players(&self, players: &HashMap<i64, Player>) -> HashMap<i64, PackedPlayer> {

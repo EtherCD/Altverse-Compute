@@ -54,6 +54,7 @@ pub struct PackedArea {
 pub enum Package {
   NewPlayer(PackedPlayer),
   ClosePlayer(i64),
+  Players(HashMap<i64, PackedPlayer>),
   UpdatePlayers(HashMap<i64, HashMap<String, serde_json::Value>>),
   UpdateEntities(HashMap<i64, HashMap<String, serde_json::Value>>),
   AreaInit(PackedArea),

@@ -29,7 +29,7 @@ impl ChangerEntity {
 }
 
 impl Enemy for ChangerEntity {
-  fn update(&mut self, props: crate::units::structures::UpdateProps) {
+  fn update(&mut self, props: &crate::units::structures::EntityUpdateProps) {
     self.timer += props.delta as f64;
 
     if self.timer > 5000.0 {

@@ -3,6 +3,7 @@ import { App } from 'uWebSockets.js'
 import { WebSocket } from 'uWebSockets.js'
 import fs from 'fs'
 import path from 'path'
+import { decode, decodeBlock } from 'lz4'
 
 const worldsDir = fs.readdirSync('./test/worlds')
 let worlds = []

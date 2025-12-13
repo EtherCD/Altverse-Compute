@@ -19,7 +19,7 @@ impl ImmuneEntity {
 }
 
 impl Enemy for ImmuneEntity {
-  fn update(&mut self, props: crate::units::structures::UpdateProps) {
+  fn update(&mut self, props: &crate::units::structures::EntityUpdateProps) {
     self.entity.update(props);
     self.entity.collide();
   }

@@ -4,13 +4,14 @@ use crate::{
   assets::{
     enemy::Enemy,
     entity::{
-      changer::ChangerEntity, immune::ImmuneEntity, normal::NormalEntity, wall::WallEntity,
+      changer::ChangerEntity, homing::HomingEntity, immune::ImmuneEntity, normal::NormalEntity,
+      wall::WallEntity,
     },
   },
   network::PackedEntity,
   units::{
     player::Player,
-    structures::{AdditionalEntityProps, EntityProps, UpdateProps},
+    structures::{AdditionalEntityProps, EntityProps, EntityUpdateProps},
   },
 };
 
@@ -21,11 +22,13 @@ macro_rules! enemy_dispatch {
       Enemies::Wall(v) => v.$method($($arg),*),
       Enemies::Immune(v) => v.$method($($arg),*),
       Enemies::Changer(v) => v.$method($($arg),*),
+      Enemies::Homing(v) => v.$method($($arg),*),
     }
   };
 }
 
 pub mod changer;
+pub mod homing;
 pub mod immune;
 pub mod normal;
 pub mod wall;
@@ -35,6 +38,7 @@ pub enum Enemies {
   Wall(WallEntity),
   Immune(ImmuneEntity),
   Changer(ChangerEntity),
+  Homing(HomingEntity),
 }
 
 impl Enemies {
@@ -60,6 +64,10 @@ impl Enemies {
         props.type_id = 5;
         Ok(Enemies::Changer(ChangerEntity::new(*props, additional)))
       }
+      "homing" => {
+        props.type_id = 9;
+        Ok(Enemies::Homing(HomingEntity::new(*props, additional)))
+      }
       _ => Err(Error::new(
         Status::InvalidArg,
         "Unknown enemy type: ".to_string() + name,
@@ -67,7 +75,7 @@ impl Enemies {
     }
   }
 
-  pub fn update(&mut self, props: UpdateProps) {
+  pub fn update(&mut self, props: &EntityUpdateProps) {
     enemy_dispatch!(self, update(props));
   }
 

@@ -1,4 +1,8 @@
+use std::collections::HashMap;
+
 use napi_derive::napi;
+
+use crate::units::player::Player;
 
 pub struct PlayerProps {
   pub name: String,
@@ -15,6 +19,7 @@ pub struct EntityProps {
   pub boundary: Boundary,
 }
 
+#[derive(Clone, Copy)]
 pub struct AdditionalEntityProps {
   pub count: u64,
   pub num: u64,
@@ -39,6 +44,12 @@ impl JoinProps {
 pub struct UpdateProps {
   pub delta: i64,
   pub time_fix: f64,
+}
+
+pub struct EntityUpdateProps<'a> {
+  pub delta: i64,
+  pub time_fix: f64,
+  pub players: Vec<&'a Player>,
 }
 
 #[derive(Clone, Debug)]

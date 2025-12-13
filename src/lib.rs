@@ -1,10 +1,10 @@
 #![deny(clippy::all)]
 
-use std::{collections::HashMap, sync::Mutex};
+use std::{collections::HashMap, io, sync::Mutex};
 
 use crate::{
   config::Config,
-  network::{NetworkClient, Package},
+  network::{NetworkClient, Package, PackedPlayer},
   structures::GameProps,
   units::{
     player::Player,
@@ -14,7 +14,7 @@ use crate::{
 };
 use chrono::Utc;
 use lazy_static::lazy_static;
-use lz4_flex::frame::FrameEncoder;
+use lz4_flex::{compress_prepend_size, frame::FrameEncoder};
 use napi::{
   Env, Error, Status,
   bindgen_prelude::{JsObjectValue, Object, Uint8ArraySlice},
@@ -79,11 +79,13 @@ impl Game {
     let new_player_package = Package::NewPlayer(player.pack());
     let area_init_package = Package::AreaInit(world.pack_area(player.area as usize));
     let my_self_package = Package::MySelf(player.pack());
+    let players_package = Package::Players(self.get_packed_players());
 
     self.add_client(props);
     self.send_to_all(new_player_package);
     self.send_to_client(player.id, area_init_package);
     self.send_to_client(player.id, my_self_package);
+    self.send_to_client(player.id, players_package);
     self.players.insert(props.id, player);
   }
 
@@ -149,8 +151,10 @@ impl Game {
     for (index, client) in self.clients.iter_mut() {
       let key = env.create_string(index.to_string())?;
       if let Ok(_) = serde_json::to_string(&client.packages) {
+        let raw = rmp_serde::to_vec_named(&client.packages).unwrap();
+        let mut slice: &[u8] = &raw;
         let mut compressor = FrameEncoder::new(Vec::new());
-        serde_json::to_writer(&mut compressor, &client.packages).unwrap();
+        io::copy(&mut slice, &mut compressor)?;
         if let Ok(buffer) = compressor.finish() {
           let uint8 = Uint8ArraySlice::from_data(env, buffer)?;
           object.set_property(key, uint8)?;
@@ -189,6 +193,8 @@ impl Game {
               next_area.join(player);
               let area_init_package = Package::AreaInit(world.pack_area(player.area as usize));
               self.send_to_client(*id, area_init_package);
+              let players_package = Package::Players(self.get_packed_players());
+              self.send_to_client(*id, players_package);
             }
           }
           world::warp::Change::PrevArea => {
@@ -201,14 +207,71 @@ impl Game {
               prev_area.join(player);
               player.pos.x = prev_area.w + 8.0 * 32.0 - player.radius;
               let area_init_package = Package::AreaInit(world.pack_area(player.area as usize));
+              let players_package = Package::Players(self.get_packed_players());
+              self.send_to_client(*id, players_package);
               self.send_to_client(*id, area_init_package);
             }
           }
-          world::warp::Change::NextWorld => {}
-          world::warp::Change::PrevWorld => {}
+          world::warp::Change::NextWorld => {
+            if let Some(prev_world) = self.worlds.get_mut(&player.world) {
+              prev_world.leave(player);
+            }
+            let next_world_name = Game::get_next_world(&config.worlds, &player.world);
+            let next_world = self.worlds.get_mut(&next_world_name).unwrap();
+            let area = next_world.areas.get_mut(0).unwrap();
+            player.world = next_world_name;
+            player.pos.y = area.h - player.radius - 2.0 * 32.0;
+            next_world.join(player);
+            let area_init_package = Package::AreaInit(next_world.pack_area(player.area as usize));
+            let players_package = Package::Players(self.get_packed_players());
+            self.send_to_client(*id, area_init_package);
+            self.send_to_client(*id, players_package);
+          }
+          world::warp::Change::PrevWorld => {
+            if let Some(prev_world) = self.worlds.get_mut(&player.world) {
+              prev_world.leave(player);
+            }
+            let prev_world_name = Game::get_prev_world(&config.worlds, &player.world);
+            let prev_world = self.worlds.get_mut(&prev_world_name).unwrap();
+            player.world = prev_world_name;
+            player.pos.y = player.radius + 2.0 * 32.0;
+            prev_world.join(player);
+            let area_init_package = Package::AreaInit(prev_world.pack_area(player.area as usize));
+            self.send_to_client(*id, area_init_package);
+            let players_package = Package::Players(self.get_packed_players());
+            self.send_to_client(*id, players_package);
+          }
         };
       }
     }
+  }
+
+  fn get_next_world(world_names: &Vec<String>, current_world: &String) -> String {
+    let current_index = world_names.iter().position(|name| name == current_world);
+
+    match current_index {
+      Some(idx) if idx + 1 < world_names.len() => world_names[idx + 1].clone(),
+      _ => world_names.get(0).unwrap().clone(),
+    }
+  }
+
+  fn get_prev_world(world_names: &Vec<String>, current_world: &String) -> String {
+    let current_index = world_names.iter().position(|name| name == current_world);
+
+    match current_index {
+      Some(idx) if idx > 0 => world_names[idx - 1].clone(),
+      _ => world_names.get(world_names.len() - 1).unwrap().clone(),
+    }
+  }
+
+  fn get_packed_players(&mut self) -> HashMap<i64, PackedPlayer> {
+    let mut output = HashMap::new();
+
+    for (id, player) in self.players.iter() {
+      output.insert(*id, player.pack());
+    }
+
+    output
   }
 
   fn send_to_client(&mut self, id: i64, package: Package) {

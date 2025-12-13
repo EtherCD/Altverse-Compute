@@ -1,10 +1,10 @@
 use crate::{
   network::PackedEntity,
-  units::{player::Player, structures::UpdateProps},
+  units::{player::Player, structures::EntityUpdateProps},
 };
 
 pub trait Enemy {
-  fn update(&mut self, props: UpdateProps);
+  fn update(&mut self, props: &EntityUpdateProps);
   fn interact(&mut self, player: &mut Player);
   fn pack(&self) -> PackedEntity;
 }

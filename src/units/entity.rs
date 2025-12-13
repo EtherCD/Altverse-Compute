@@ -5,7 +5,7 @@ use crate::{
   units::{
     player::Player,
     random,
-    structures::{Boundary, EntityProps, UpdateProps, distance},
+    structures::{Boundary, EntityProps, EntityUpdateProps, distance},
     vector::Vector,
   },
 };
@@ -17,7 +17,7 @@ pub struct Entity {
   pub speed: f64,
   pub harmless: bool,
   pub immune: bool,
-  angle: f64,
+  pub angle: f64,
   pub pos: Vector,
   pub vel: Vector,
   pub to_remove: bool,
@@ -56,7 +56,7 @@ impl Entity {
     }
   }
 
-  pub fn update(&mut self, props: UpdateProps) {
+  pub fn update(&mut self, props: &EntityUpdateProps) {
     self.movement(props.time_fix);
   }
 

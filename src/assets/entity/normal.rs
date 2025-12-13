@@ -19,7 +19,7 @@ impl NormalEntity {
 }
 
 impl Enemy for NormalEntity {
-  fn update(&mut self, props: crate::units::structures::UpdateProps) {
+  fn update(&mut self, props: &crate::units::structures::EntityUpdateProps) {
     self.entity.update(props);
     self.entity.collide();
   }
