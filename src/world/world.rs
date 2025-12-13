@@ -29,7 +29,7 @@ impl World {
 
   pub fn leave(&mut self, player: &Player) {
     if let Some(area) = self.areas.get_mut(player.area as usize) {
-      area.leave(player.id as usize);
+      area.leave(player.id);
     }
   }
 

@@ -13,7 +13,7 @@ pub struct Spawn {
   pub max_speed: f64,
   pub regeneration: f64,
   pub energy: f64,
-  pub max_energy: i64,
+  pub max_energy: f64,
   pub world: String,
   pub area: i64,
 
@@ -34,7 +34,7 @@ impl Config {
         max_speed: 17.0,
         regeneration: 7.0,
         energy: 30.0,
-        max_energy: 30,
+        max_energy: 30.0,
         world: "".to_string(),
         area: 0,
         sx: -(10.0 * 32.0 - 155.0),

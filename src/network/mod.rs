@@ -20,7 +20,7 @@ pub struct PackedPlayer {
   pub radius: f64,
   pub speed: f64,
   pub energy: f64,
-  pub max_energy: i64,
+  pub max_energy: f64,
   pub death_timer: f64,
   pub state: u64,
   pub state_meta: f64,

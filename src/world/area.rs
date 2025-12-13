@@ -36,15 +36,11 @@ impl Area {
     if self.players.len() == 0 {
       self.init();
     }
-    println!("Join");
     self.players.push(player.id);
   }
 
-  pub fn leave(&mut self, id: usize) {
-    if let Some(_) = self.players.get(id) {
-      self.players.remove(id);
-      println!("Leave");
-    }
+  pub fn leave(&mut self, id: i64) {
+    self.players.retain(|&item| item != id);
     if self.players.len() == 0 {
       self.entities.clear();
     }

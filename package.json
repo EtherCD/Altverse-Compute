@@ -46,7 +46,7 @@
     "format:prettier": "prettier . -w",
     "format:toml": "taplo format",
     "format:rs": "cargo fmt",
-    "test": "tsx test.ts"
+    "test": "tsx ./test"
   },
   "devDependencies": {
     "@emnapi/core": "^1.5.0",

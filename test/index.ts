@@ -1,157 +1,20 @@
-import ge from '.'
+import ge from '..'
 import { App } from 'uWebSockets.js'
 import { WebSocket } from 'uWebSockets.js'
+import fs from 'fs'
+import path from 'path'
 
-const engine = new ge.Game(
-  new ge.GameProps(
-    `
-{
-    "spawn": {
-  "radius": 15,
-  "speed": 17,
-  "max_speed": 17,
-  "regeneration": 7,
-  "energy": 0,
-  "max_energy": 30,
-  "world": "Celestial Canyon",
-  "area": 0,
+const worldsDir = fs.readdirSync('./test/worlds')
+let worlds = []
+for (const world in worldsDir) {
+  console.log(worldsDir[world])
+  try {
+    worlds.push(fs.readFileSync('./test/worlds/' + worldsDir[world]) + '')
+  } catch {}
+}
+const config = fs.readFileSync('./test/config.json') + ''
 
-  "sx": -165,
-  "sy": 815,
-  "ex": -15,
-  "ey": 401,
-
-  "died_timer": 2
-},
-    "worlds": ["Celestial Canyon", "Full Function"]
-  }
-    `,
-    [
-      `
-  {
-  "client": {
-    "fillStyle": "#b3cde0",
-    "strokeStyle": "#011f4b",
-    "areaFill": "#011f4b"
-  },
-  "name": "Celestial Canyon",
-  "areas": [
-    {
-      "enemies": [
-        {
-          "types": ["flame", "homing_sniper", "sniper"],
-          "radius": 15,
-          "speed": 5,
-          "count": 10
-        },
-        {
-          "types": ["tree"],
-          "radius": 30,
-          "speed": 0,
-          "count": 2,
-          "aura": 400
-        },
-        {
-          "types": ["wall"],
-          "radius": 30,
-          "speed": 5,
-          "count": 5
-        }
-      ],
-      "w": 1920,
-      "h": 480
-    },
-    {
-      "enemies": [
-        {
-          "types": ["flame", "homing_sniper", "sniper"],
-          "radius": 15,
-          "speed": 5,
-          "count": 10
-        },
-        {
-          "types": ["tree"],
-          "radius": 30,
-          "speed": 0,
-          "count": 2,
-          "aura": 400
-        },
-        {
-          "types": ["wall"],
-          "radius": 30,
-          "speed": 5,
-          "count": 5
-        }
-      ],
-      "w": 1920,
-      "h": 480
-    }
-  ]
-}`,
-      `
-  {
-  "client": {
-    "fillStyle": "#b3cde0",
-    "strokeStyle": "#011f4b",
-    "areaFill": "#011f4b"
-  },
-  "name": "Full Function",
-  "areas": [
-    {
-      "enemies": [
-        {
-          "types": ["flame", "homing_sniper", "sniper"],
-          "radius": 15,
-          "speed": 5,
-          "count": 10
-        },
-        {
-          "types": ["tree"],
-          "radius": 30,
-          "speed": 0,
-          "count": 2,
-          "aura": 400
-        },
-        {
-          "types": ["wall"],
-          "radius": 30,
-          "speed": 5,
-          "count": 5
-        }
-      ],
-      "w": 1920,
-      "h": 480
-    },
-    {
-      "enemies": [
-        {
-          "types": ["flame", "homing_sniper", "sniper"],
-          "radius": 15,
-          "speed": 5,
-          "count": 10
-        },
-        {
-          "types": ["tree"],
-          "radius": 30,
-          "speed": 0,
-          "count": 2,
-          "aura": 400
-        },
-        {
-          "types": ["wall"],
-          "radius": 30,
-          "speed": 5,
-          "count": 5
-        }
-      ],
-      "w": 1920,
-      "h": 480
-    }
-  ]
-}`,
-    ],
-  ),
-)
+const engine = new ge.Game(new ge.GameProps(config, worlds))
 
 let lastId = 0
 let clients = new Map<number, WebSocket<Client>>()
@@ -256,11 +119,12 @@ App()
   })
   .listen(8080, () => {
     console.info(`
-   ___   ____                      
-  / _ | / / /__  _____ _______ ___ 
- / __ |/ / __/ |/ / -_) __(_-</ -_)
-/_/ |_/_/\\__/|___/\\__/_/ /___/\\__/ 
-  `)
+   ___   ____                               
+  / _ | / / /__  _____ _______ ___   _______
+ / __ |/ / __/ |/ / -_) __(_-</ -_) / __(_-<
+/_/ |_/_/\\__/|___/\\__/_/ /___/\\__/ /_/ /___/
+                                            
+`)
 
     console.log('Started at 8080')
   })

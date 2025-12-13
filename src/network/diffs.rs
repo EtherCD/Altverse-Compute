@@ -70,7 +70,7 @@ impl PackedPlayer {
     }
     if self.area != new.area {
       println!("{}", new.area);
-      diff.insert("area".to_string(), Value::from(new.area));
+      diff.insert("area".to_string(), Value::from(new.area as i64));
     }
     if self.world != new.world {
       diff.insert("world".to_string(), Value::from(new.world.clone()));

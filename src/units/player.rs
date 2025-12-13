@@ -15,9 +15,9 @@ pub struct Player {
   slide: Vector,
   pub speed: f64,
   pub energy: f64,
-  pub max_energy: i64,
+  pub max_energy: f64,
   pub downed: bool,
-  pub regeneration: f32,
+  pub regeneration: f64,
   pub world: String,
   pub area: u64,
   angle: f64,
@@ -41,9 +41,9 @@ impl Player {
       slide: Vector::new(None, None),
       speed: spawn.speed,
       energy: spawn.energy,
-      max_energy: spawn.max_energy as i64,
+      max_energy: spawn.max_energy,
       downed: false,
-      regeneration: spawn.regeneration as f32,
+      regeneration: spawn.regeneration,
       angle: 0.0,
       death_timer: spawn.died_timer,
       immortal: false,
@@ -87,6 +87,15 @@ impl Player {
     self.slide.x = self.acc.x;
     self.slide.y = self.acc.y;
     self.acc = Vector::new(None, None);
+
+    self.regenerate_energy(props.delta);
+  }
+
+  fn regenerate_energy(&mut self, delta: i64) {
+    self.energy += self.regeneration * (delta as f64 / 1000.0);
+    if self.energy > self.max_energy {
+      self.energy = self.max_energy;
+    }
   }
 
   pub fn input(&mut self, input: &InputProps) {

@@ -4,3 +4,11 @@
   <p>Game logic core for the Altverse game</p>
   <b>Currently in deep development and finalization</b>
 </div>
+
+```
+   ___   ____
+  / _ | / / /__  _____ _______ ___   _______
+ / __ |/ / __/ |/ / -_) __(_-</ -_) / __(_-<
+/_/ |_/_/\__/|___/\__/_/ /___/\__/ /_/ /___/
+
+```

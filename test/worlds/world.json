@@ -1,0 +1,60 @@
+{
+  "client": {
+    "fillStyle": "#b3cde0",
+    "strokeStyle": "#011f4b",
+    "areaFill": "#011f4b"
+  },
+  "name": "Celestial Canyon",
+  "areas": [
+    {
+      "enemies": [
+        {
+          "types": ["flame", "homing_sniper", "sniper"],
+          "radius": 15,
+          "speed": 5,
+          "count": 10
+        },
+        {
+          "types": ["tree"],
+          "radius": 30,
+          "speed": 0,
+          "count": 2,
+          "aura": 400
+        },
+        {
+          "types": ["wall"],
+          "radius": 30,
+          "speed": 5,
+          "count": 5
+        }
+      ],
+      "w": 1920,
+      "h": 480
+    },
+    {
+      "enemies": [
+        {
+          "types": ["flame", "homing_sniper", "sniper"],
+          "radius": 15,
+          "speed": 5,
+          "count": 10
+        },
+        {
+          "types": ["tree"],
+          "radius": 30,
+          "speed": 0,
+          "count": 2,
+          "aura": 400
+        },
+        {
+          "types": ["wall"],
+          "radius": 30,
+          "speed": 5,
+          "count": 5
+        }
+      ],
+      "w": 1920,
+      "h": 480
+    }
+  ]
+}

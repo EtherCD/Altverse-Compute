@@ -1,0 +1,20 @@
+{
+  "spawn": {
+    "radius": 15,
+    "speed": 17,
+    "max_speed": 17,
+    "regeneration": 7,
+    "energy": 0,
+    "max_energy": 30,
+    "world": "Celestial Canyon",
+    "area": 0,
+
+    "sx": -305,
+    "sy": 79,
+    "ex": -15,
+    "ey": 465,
+
+    "died_timer": 2
+  },
+  "worlds": ["Celestial Canyon", "Eternal Excruciation"]
+}
