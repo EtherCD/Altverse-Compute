@@ -7,11 +7,18 @@ pub struct PlayerProps {
   pub area: u64,
 }
 
+#[derive(Clone, Copy)]
 pub struct EntityProps {
   pub type_id: u64,
   pub radius: f64,
   pub speed: f64,
   pub boundary: Boundary,
+}
+
+pub struct AdditionalEntityProps {
+  pub count: u64,
+  pub num: u64,
+  pub inverse: bool,
 }
 
 #[napi]
@@ -107,6 +114,7 @@ pub fn distance(a: f64, b: f64) -> f64 {
   (a * a + b * b).sqrt()
 }
 
+#[derive(Debug, Clone, Copy)]
 pub struct Boundary {
   pub x: f64,
   pub y: f64,

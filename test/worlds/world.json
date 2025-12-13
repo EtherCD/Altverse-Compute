@@ -9,20 +9,25 @@
     {
       "enemies": [
         {
-          "types": ["flame", "homing_sniper", "sniper"],
+          "types": ["wall"],
           "radius": 15,
           "speed": 5,
           "count": 10
         },
         {
-          "types": ["tree"],
+          "types": ["normal"],
           "radius": 30,
-          "speed": 0,
-          "count": 2,
-          "aura": 400
+          "speed": 5,
+          "count": 5
         },
         {
-          "types": ["wall"],
+          "types": ["immune"],
+          "radius": 30,
+          "speed": 5,
+          "count": 5
+        },
+        {
+          "types": ["changer"],
           "radius": 30,
           "speed": 5,
           "count": 5

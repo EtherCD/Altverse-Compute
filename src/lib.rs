@@ -21,6 +21,7 @@ use napi::{
 };
 use napi_derive::napi;
 
+mod assets;
 mod config;
 mod network;
 mod structures;

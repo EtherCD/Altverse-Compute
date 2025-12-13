@@ -10,18 +10,19 @@ use crate::{
   },
 };
 
+#[derive(Clone)]
 pub struct Entity {
-  type_id: u64,
-  radius: f64,
-  speed: f64,
-  harmless: bool,
-  immune: bool,
+  pub type_id: u64,
+  pub radius: f64,
+  pub speed: f64,
+  pub harmless: bool,
+  pub immune: bool,
   angle: f64,
-  pos: Vector,
-  vel: Vector,
-  to_remove: bool,
-  friction: f64,
-  boundary: Boundary,
+  pub pos: Vector,
+  pub vel: Vector,
+  pub to_remove: bool,
+  pub friction: f64,
+  pub boundary: Boundary,
 
   state: u64,
   state_metadata: f64,
@@ -57,7 +58,6 @@ impl Entity {
 
   pub fn update(&mut self, props: UpdateProps) {
     self.movement(props.time_fix);
-    self.collide();
   }
 
   pub fn movement(&mut self, time_fix: f64) {
@@ -100,7 +100,10 @@ impl Entity {
   }
 
   pub fn interact(&mut self, player: &mut Player) {
-    if player.pos.x > -player.radius && player.pos.x - player.radius < self.boundary.w {
+    if !self.harmless
+      && player.pos.x > -player.radius
+      && player.pos.x - player.radius < self.boundary.w
+    {
       if !player.immortal && !player.downed {
         if distance(player.pos.x - self.pos.x, player.pos.y - self.pos.y)
           <= self.radius + player.radius

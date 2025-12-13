@@ -1,18 +1,18 @@
 use std::collections::HashMap;
 
 use crate::{
+  assets::entity::Enemies,
   network::{NetworkClient, Package, PackedEntity, PackedPlayer},
   units::{
-    entity::Entity,
     player::Player,
-    // random,
-    structures::{Boundary, EntityProps, UpdateProps},
+    random,
+    structures::{AdditionalEntityProps, Boundary, EntityProps, UpdateProps},
   },
   world::RawArea,
 };
 
 pub struct Area {
-  pub entities: HashMap<i64, Entity>,
+  pub entities: HashMap<i64, Enemies>,
   next_id: i64,
   pub w: f64,
   pub h: f64,
@@ -49,25 +49,32 @@ impl Area {
   pub fn init(&mut self) {
     if self.props.enemies.len() != 0 {
       for entity in &self.props.enemies {
-        for _ in 0..entity.count {
-          // let type_name = entity
-          //   .types
-          //   .get(random(0.0, entity.types.len() as f64 - 1.0).round() as usize);
-          self.entities.insert(
-            self.next_id,
-            Entity::new(EntityProps {
-              type_id: 0,
-              radius: entity.radius,
-              speed: entity.speed,
-              boundary: Boundary {
-                x: 0.0,
-                y: 0.0,
-                w: self.w,
-                h: self.h,
-              },
-            }),
-          );
-          self.next_id += 1;
+        let props = EntityProps {
+          type_id: 0,
+          radius: entity.radius,
+          speed: entity.speed,
+          boundary: Boundary {
+            x: 0.0,
+            y: 0.0,
+            w: self.w,
+            h: self.h,
+          },
+        };
+        for num in 0..entity.count {
+          let type_name = entity
+            .types
+            .get(random(0.0, entity.types.len() as f64 - 1.0).round() as usize)
+            .unwrap();
+          let additional = AdditionalEntityProps {
+            count: entity.count as u64,
+            num: num as u64,
+            inverse: false,
+          };
+
+          if let Ok(entity) = Enemies::new(type_name.as_str(), &mut props.clone(), additional) {
+            self.entities.insert(self.next_id, entity);
+            self.next_id += 1;
+          }
         }
       }
     }

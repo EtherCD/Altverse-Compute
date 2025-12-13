@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{config::Config, units::player::Player, world::world::World};
+use crate::{units::player::Player, world::world::World};
 
 pub enum Change {
   NextArea,
