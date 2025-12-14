@@ -6,7 +6,7 @@
     "regeneration": 7,
     "energy": 0,
     "max_energy": 30,
-    "world": "Celestial Canyon",
+    "world": "Melancholic Meadows",
     "area": 0,
 
     "sx": -305,
@@ -16,5 +16,5 @@
 
     "died_timer": 2
   },
-  "worlds": ["Celestial Canyon", "Eternal Excruciation"]
+  "worlds": ["Melancholic Meadows", "Doomsday Dales"]
 }

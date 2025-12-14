@@ -40,7 +40,7 @@ impl World {
       h: area.h,
       area: area_id as u32,
       world: self.name.clone(),
-      entities: area.get_entities(),
+      entities: area.get_enemies(),
     };
   }
 }

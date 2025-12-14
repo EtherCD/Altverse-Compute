@@ -29,6 +29,13 @@ interface Client {
   username: string
 }
 
+engine.onPlayerDeath((id) => {
+  if (clients.get(id)) {
+    clients.get(id)?.close
+  }
+  return null
+})
+
 App()
   .ws<Client>('/server', {
     open: (ws) => {
@@ -104,7 +111,8 @@ App()
             // mouseEnable(ws, data.mouseEnable!)
             break
           case 'ability':
-            // ability(ws, data.ability!)
+            if (data.ability === 'first') input.setFirstAbility(true)
+            if (data.ability === 'second') input.setSecondAbility(true)
             break
         }
       }

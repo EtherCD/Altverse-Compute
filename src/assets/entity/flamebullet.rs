@@ -1,5 +1,8 @@
 use crate::{
-  assets::{enemy::Enemy, entity::EnemyWrapper},
+  assets::{
+    enemy::Enemy,
+    entity::{EnemyWrapper, flametrail::TrailEntity},
+  },
   units::{
     entity::Entity,
     structures::{AdditionalEntityProps, EntityProps},
@@ -7,16 +10,19 @@ use crate::{
 };
 
 #[derive(Clone)]
-pub struct BulletEntity {
+pub struct FlameBulletEntity {
   pub entity: Entity,
+  timer: f64,
 }
 
-impl BulletEntity {
+impl FlameBulletEntity {
   pub fn new(props: EntityProps, _: AdditionalEntityProps) -> Self {
     Self {
       entity: Entity::new(props.clone()),
+      timer: 0.0,
     }
   }
+
   fn collide(entity: &mut Entity) {
     if entity.pos.x - entity.radius < entity.boundary.x {
       entity.pos.x = entity.boundary.x + entity.radius;
@@ -41,10 +47,35 @@ impl BulletEntity {
   }
 }
 
-impl Enemy for BulletEntity {
+impl Enemy for FlameBulletEntity {
   fn update(&mut self, props: &crate::units::structures::EntityUpdateProps) {
     self.entity.update(props);
-    BulletEntity::collide(&mut self.entity);
+    FlameBulletEntity::collide(&mut self.entity);
+
+    self.timer += props.delta as f64;
+    if self.timer >= 32.0 * ((self.entity.radius * 2.0) / self.entity.speed) {
+      let mut trail = TrailEntity::new(
+        EntityProps {
+          type_id: 19,
+          radius: self.entity.radius,
+          speed: 0.0,
+          boundary: self.entity.boundary,
+        },
+        AdditionalEntityProps {
+          count: 0,
+          num: 0,
+          inverse: false,
+        },
+      );
+      trail.entity.pos = self.entity.pos.clone();
+
+      trail.owner_speed = self.entity.speed;
+      self.timer = 0.0;
+      self
+        .entity
+        .nested_entities
+        .push(EnemyWrapper::FlameTrail(trail));
+    }
   }
 
   fn interact(&mut self, player: &mut crate::units::player::Player) {

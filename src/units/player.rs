@@ -1,5 +1,8 @@
+use std::collections::HashMap;
+
 use crate::{
   CONFIG,
+  assets::effect::EffectWrapper,
   network::PackedPlayer,
   units::{structures::*, vector::Vector},
 };
@@ -21,16 +24,16 @@ pub struct Player {
   pub world: String,
   pub area: u64,
   angle: f64,
-  death_timer: f64,
+  pub death_timer: f64,
 
   pub immortal: bool,
   state: u64,
   state_meta: f64,
-  to_delete: bool,
+  pub to_delete: bool,
 }
 
 impl Player {
-  pub fn new(props: PlayerProps) -> Player {
+  pub fn new(props: PlayerProps) -> Self {
     let spawn = CONFIG.lock().unwrap().clone().spawn;
     Player {
       name: props.name,
@@ -91,10 +94,21 @@ impl Player {
     self.acc = Vector::new(None, None);
 
     self.regenerate_energy(props.delta);
-    self.death_timer -= props.delta as f64 / 1000.0;
-    if self.death_timer < 0.0 {
-      self.to_delete = true;
+    if self.downed {
+      self.death_timer -= props.delta as f64 / 1000.0;
+      if self.death_timer < 0.0 {
+        self.to_delete = true;
+      }
     }
+
+    // self.effects.retain(|id, effect| {
+    //   if effect.update(props) {
+    //     effect.clear();
+    //     false
+    //   } else {
+    //     true
+    //   }
+    // })
   }
 
   fn regenerate_energy(&mut self, delta: i64) {
@@ -104,7 +118,7 @@ impl Player {
     }
   }
 
-  pub fn input(&mut self, input: &InputProps) {
+  pub fn input(&mut self, input: &mut InputProps) {
     let shift: f64 = if input.shift { 0.5 } else { 1.0 };
 
     if input.left {
@@ -141,6 +155,13 @@ impl Player {
       self.acc.x = dist_movement * self.angle.cos();
       self.acc.y = dist_movement * self.angle.sin();
     }
+
+    if input.first_ability {
+      input.first_ability = false;
+    }
+    if input.second_ability {
+      input.second_ability = false;
+    }
   }
 
   pub fn knock(&mut self) {
@@ -166,6 +187,20 @@ impl Player {
       self.pos.y = boundary.y + boundary.h - self.radius;
     }
   }
+
+  // pub fn add_effect(&mut self, id: i64, effect: EffectWrapper) {
+  //   if let Some(_) = self.effects.get(&id) {
+  //   } else {
+  //     self.effects.insert(id, effect);
+  //   }
+  // }
+
+  // pub fn has_effect(&mut self, id: i64) -> bool {
+  //   if let Some(_) = self.effects.get(&id) {
+  //     return true;
+  //   }
+  //   false
+  // }
 
   pub fn pack(&self) -> PackedPlayer {
     PackedPlayer {

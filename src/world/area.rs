@@ -1,10 +1,9 @@
 use std::collections::HashMap;
 
 use crate::{
-  assets::entity::Enemies,
+  assets::entity::EnemyWrapper,
   network::{NetworkClient, Package, PackedEntity, PackedPlayer},
   units::{
-    entity::Entity,
     player::Player,
     random,
     structures::{
@@ -15,7 +14,7 @@ use crate::{
 };
 
 pub struct Area {
-  pub entities: HashMap<i64, Enemies>,
+  pub entities: HashMap<i64, EnemyWrapper>,
   next_id: i64,
   pub w: f64,
   pub h: f64,
@@ -74,7 +73,8 @@ impl Area {
             inverse: false,
           };
 
-          if let Ok(entity) = Enemies::new(type_name.as_str(), &mut props.clone(), additional) {
+          if let Ok(entity) = EnemyWrapper::new(type_name.as_str(), &mut props.clone(), additional)
+          {
             self.entities.insert(self.next_id, entity);
             self.next_id += 1;
           }
@@ -91,7 +91,7 @@ impl Area {
   ) -> Vec<Package> {
     let mut packages: Vec<Package> = Vec::new();
 
-    let old_entities = self.get_entities();
+    let old_entities = self.get_enemies();
     let old_players = self.get_players(players);
 
     let entity_update = EntityUpdateProps {
@@ -100,9 +100,11 @@ impl Area {
       players: self.get_players_vec(players),
     };
 
+    let mut new_entities_created = HashMap::new();
     let mut nested_enemies = Vec::new();
+    let mut entities_to_remove = Vec::new();
 
-    for (id, entity) in self.entities.iter_mut() {
+    for (_, entity) in self.entities.iter_mut() {
       entity.update(&entity_update);
       for nested in entity.get_nested_entities() {
         nested_enemies.push(nested);
@@ -110,13 +112,9 @@ impl Area {
       entity.clear_nested_entities();
     }
 
-    let mut new_entities_created: HashMap<i64, PackedEntity> = HashMap::new();
-
-    let mut entities_to_remove = Vec::new();
-
     for enemy in nested_enemies {
       new_entities_created.insert(self.next_id, enemy.clone().pack());
-      self.add_entity(enemy);
+      self.add_enemy(enemy);
     }
 
     for (_, entity) in self.entities.iter_mut() {
@@ -127,42 +125,51 @@ impl Area {
       }
     }
 
-    for (id, entity) in self.entities.iter() {
+    self.entities.retain(|id, entity| {
       if entity.is_to_remove() {
         entities_to_remove.push(*id);
+        false
+      } else {
+        true
       }
-    }
+    });
 
     for id in self.players.iter() {
       if let Some(player) = players.get_mut(id) {
         if let Some(client) = clients.get_mut(id) {
-          player.input(&client.input);
+          player.input(&mut client.input);
         }
         player.update(update);
         player.collide(self.as_boundary_player());
       }
     }
 
-    for first_id in self.players.iter() {
-      for second_id in self.players.iter() {
-        if first_id != second_id {
-          let first_player = players.get(first_id).unwrap();
-          let second_player = players.get(second_id).unwrap();
-          if second_player.downed
-            && first_id != second_id
+    let player_ids: Vec<i64> = self.players.iter().copied().collect();
+    for &first_id in &player_ids {
+      for &second_id in &player_ids {
+        if first_id == second_id {
+          continue;
+        }
+
+        let can_rescue = {
+          let first_player = players.get(&first_id).unwrap();
+          let second_player = players.get(&second_id).unwrap();
+          second_player.downed
             && distance(
               second_player.pos.x - first_player.pos.x,
               second_player.pos.y - first_player.pos.y,
             ) <= first_player.radius + second_player.radius
-          {
-            let second_player = players.get_mut(second_id).unwrap();
+        };
+
+        if can_rescue {
+          if let Some(second_player) = players.get_mut(&second_id) {
             second_player.res();
           }
         }
       }
     }
 
-    let new_entities = self.get_entities();
+    let new_entities = self.get_enemies();
     let new_players = self.get_players(players);
 
     let mut entities_diffs = HashMap::new();
@@ -186,7 +193,7 @@ impl Area {
       }
     }
 
-    if &new_entities_created.len() > &(0 as usize) {
+    if !&new_entities_created.is_empty() {
       packages.push(Package::NewEntities(new_entities_created))
     }
 
@@ -194,26 +201,26 @@ impl Area {
       self.entities.remove(i);
     }
 
-    if &entities_to_remove.len() > &(0 as usize) {
+    if !&entities_to_remove.is_empty() {
       packages.push(Package::CloseEntities(entities_to_remove));
     }
 
-    if entities_diffs.len() != 0 {
+    if !entities_diffs.is_empty() {
       packages.push(Package::UpdateEntities(entities_diffs));
     }
-    if players_diffs.len() != 0 {
+    if !players_diffs.is_empty() {
       packages.push(Package::UpdatePlayers(players_diffs));
     }
 
     packages
   }
 
-  fn add_entity(&mut self, entity: Enemies) {
+  fn add_enemy(&mut self, entity: EnemyWrapper) {
     self.entities.insert(self.next_id, entity);
     self.next_id += 1;
   }
 
-  pub fn get_entities(&self) -> HashMap<i64, PackedEntity> {
+  pub fn get_enemies(&self) -> HashMap<i64, PackedEntity> {
     let mut res: HashMap<i64, PackedEntity> = HashMap::new();
 
     for (id, entity) in &self.entities {

@@ -1,7 +1,7 @@
 use crate::{
   assets::{
     enemy::Enemy,
-    entity::{EnemyWrapper, bullet::BulletEntity},
+    entity::{EnemyWrapper, flamebullet::FlameBulletEntity},
   },
   units::{
     entity::Entity,
@@ -12,28 +12,28 @@ use crate::{
 };
 
 #[derive(Clone)]
-pub struct SniperEntity {
+pub struct FlameSniperEntity {
   entity: Entity,
   timer: f64,
 }
 
-impl SniperEntity {
+impl FlameSniperEntity {
   pub fn new(props: EntityProps, _: AdditionalEntityProps) -> Self {
     Self {
       entity: Entity::new(props.clone()),
-      timer: random(0.0, 3000.0),
+      timer: random(3000.0, 6000.0),
     }
   }
 }
 
-impl Enemy for SniperEntity {
+impl Enemy for FlameSniperEntity {
   fn update(&mut self, props: &crate::units::structures::EntityUpdateProps) {
     self.entity.update(props);
     self.entity.collide();
 
     self.timer += props.delta as f64;
 
-    if self.timer > 3000.0 {
+    if self.timer > 6000.0 {
       let mut target: Option<&&Player> = None;
       let mut last_distance = 20.0 * 32.0;
       for player in props.players.iter() {
@@ -54,7 +54,7 @@ impl Enemy for SniperEntity {
         if let Some(target) = target {
           let angl = (target.pos.y - self.entity.pos.y).atan2(target.pos.x - self.entity.pos.x);
 
-          let mut bullet = BulletEntity::new(
+          let mut bullet = FlameBulletEntity::new(
             EntityProps {
               type_id: 3,
               radius: self.entity.radius / 2.0,
@@ -75,7 +75,7 @@ impl Enemy for SniperEntity {
           self
             .entity
             .nested_entities
-            .push(EnemyWrapper::Bullet(bullet));
+            .push(EnemyWrapper::FlameBullet(bullet));
 
           self.timer = 0.0;
         }

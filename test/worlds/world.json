@@ -4,7 +4,7 @@
     "strokeStyle": "#011f4b",
     "areaFill": "#011f4b"
   },
-  "name": "Celestial Canyon",
+  "name": "Melancholic Meadows",
   "areas": [
     {
       "enemies": [
@@ -15,16 +15,10 @@
           "count": 10
         },
         {
-          "types": ["immune"],
-          "radius": 30,
+          "types": ["slower"],
+          "radius": 15,
           "speed": 5,
-          "count": 5
-        },
-        {
-          "types": ["sniper", "pull"],
-          "radius": 30,
-          "speed": 5,
-          "count": 5
+          "count": 20
         }
       ],
       "w": 1920,

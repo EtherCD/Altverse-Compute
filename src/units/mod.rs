@@ -2,6 +2,7 @@ use std::cell::RefCell;
 
 use rand::{Rng, rngs::ThreadRng};
 
+pub mod effect;
 pub mod entity;
 pub mod player;
 pub mod structures;

@@ -4,6 +4,7 @@ export declare class Game {
   constructor(props: GameProps)
   join(props: JoinProps): void
   leave(id: number): void
+  onPlayerDeath(callback: (arg: number) => null): void
   input(id: number, input: InputProps): void
   update(): object
 }

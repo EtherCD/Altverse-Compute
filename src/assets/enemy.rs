@@ -1,7 +1,7 @@
 use crate::{
-  assets::entity::Enemies,
+  assets::entity::EnemyWrapper,
   network::PackedEntity,
-  units::{entity::Entity, player::Player, structures::EntityUpdateProps},
+  units::{player::Player, structures::EntityUpdateProps},
 };
 
 pub trait Enemy {
@@ -9,6 +9,6 @@ pub trait Enemy {
   fn interact(&mut self, player: &mut Player);
   fn pack(&self) -> PackedEntity;
   fn is_to_remove(&self) -> bool;
-  fn get_nested_entities(&self) -> Vec<Enemies>;
+  fn get_nested_entities(&self) -> Vec<EnemyWrapper>;
   fn clear_nested_entities(&mut self);
 }

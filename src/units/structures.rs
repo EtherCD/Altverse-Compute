@@ -1,11 +1,6 @@
-use std::collections::HashMap;
-
 use napi_derive::napi;
 
-use crate::{
-  units::{entity::Entity, player::Player},
-  world::area::Area,
-};
+use crate::units::player::Player;
 
 pub struct PlayerProps {
   pub name: String,

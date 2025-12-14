@@ -14,10 +14,10 @@ use crate::{
 };
 use chrono::Utc;
 use lazy_static::lazy_static;
-use lz4_flex::{compress_prepend_size, frame::FrameEncoder};
+use lz4_flex::frame::FrameEncoder;
 use napi::{
   Env, Error, Status,
-  bindgen_prelude::{Function, JsObjectValue, Object, Uint8ArraySlice},
+  bindgen_prelude::{Function, FunctionRef, JsObjectValue, Null, Object, Uint8ArraySlice},
 };
 use napi_derive::napi;
 
@@ -39,6 +39,8 @@ pub struct Game {
   last_timestamp: i64,
   worlds: HashMap<String, World>,
   config: Config,
+
+  player_death_callback: Option<Function<'static, i64, Null>>,
 }
 
 #[napi]
@@ -59,6 +61,7 @@ impl Game {
           worlds: worlds,
           clients: HashMap::new(),
           config,
+          player_death_callback: None,
         });
       }
       Err(e) => Err(Error::new(Status::InvalidArg, e.to_string())),
@@ -102,6 +105,11 @@ impl Game {
   }
 
   #[napi]
+  pub fn on_player_death(&mut self, callback: Function<'static, i64, Null>) {
+    self.player_death_callback = Some(callback);
+  }
+
+  #[napi]
   pub fn input(&mut self, id: i64, input: &InputProps) -> Result<(), Error> {
     if let Some(client) = self.clients.get_mut(&id) {
       client.input = input.clone();
@@ -125,6 +133,7 @@ impl Game {
 
     let mut clients_packages: HashMap<i64, Vec<Package>> = HashMap::new();
 
+    let mut players_to_delete = Vec::new();
     self.warp(&config);
 
     for (_, world) in self.worlds.iter_mut() {
@@ -134,7 +143,17 @@ impl Game {
 
         for id in player_ids {
           clients_packages.insert(id, packages.clone());
+          if self.players.get(&id).unwrap().to_delete {
+            players_to_delete.push(id);
+          }
         }
+      }
+    }
+
+    for id in players_to_delete {
+      self.leave(id);
+      if let Some(callback) = &self.player_death_callback {
+        if let Err(_) = callback.call(id) {}
       }
     }
 

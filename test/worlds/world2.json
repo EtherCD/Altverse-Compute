@@ -4,15 +4,15 @@
     "strokeStyle": "#011f4b",
     "areaFill": "#011f4b"
   },
-  "name": "Eternal Excruciation",
+  "name": "Doomsday Dales",
   "areas": [
     {
       "enemies": [
         {
-          "types": ["homing"],
-          "radius": 15,
+          "types": ["drop"],
+          "radius": 20,
           "speed": 5,
-          "count": 10
+          "count": 20
         }
       ],
       "w": 1920,

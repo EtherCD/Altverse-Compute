@@ -1,5 +1,5 @@
 use crate::{
-  assets::{enemy::Enemy, entity::Enemies},
+  assets::{enemy::Enemy, entity::EnemyWrapper},
   units::{
     entity::Entity,
     structures::{AdditionalEntityProps, EntityProps},
@@ -57,7 +57,7 @@ impl Enemy for ChangerEntity {
     self.entity.to_remove
   }
 
-  fn get_nested_entities(&self) -> Vec<Enemies> {
+  fn get_nested_entities(&self) -> Vec<EnemyWrapper> {
     return self.entity.nested_entities.clone();
   }
 

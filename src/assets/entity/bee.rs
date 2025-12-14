@@ -1,3 +1,5 @@
+use std::f32::consts::PI;
+
 use crate::{
   assets::{enemy::Enemy, entity::EnemyWrapper},
   units::{
@@ -11,11 +13,11 @@ const MAX_DIST: f64 = 5.625 * 32.0;
 const ANGLE_INCREMENT: f64 = 0.04;
 
 #[derive(Clone)]
-pub struct HomingEntity {
+pub struct BeeEntity {
   entity: Entity,
 }
 
-impl HomingEntity {
+impl BeeEntity {
   pub fn new(props: EntityProps, _: AdditionalEntityProps) -> Self {
     Self {
       entity: Entity::new(props.clone()),
@@ -23,7 +25,7 @@ impl HomingEntity {
   }
 }
 
-impl Enemy for HomingEntity {
+impl Enemy for BeeEntity {
   fn update(&mut self, props: &crate::units::structures::EntityUpdateProps) {
     let mut target: Option<&&Player> = None;
     let mut last_distance = MAX_DIST;
@@ -44,20 +46,29 @@ impl Enemy for HomingEntity {
     }
 
     if let Some(target) = target {
-      let angle = (target.pos.y - self.entity.pos.y).atan2(target.pos.x - self.entity.pos.x);
-
-      let diff = angle - self.entity.angle;
-      let angle_diff = diff.sin().atan2(diff.cos());
+      let d_x = target.pos.x - self.entity.pos.x;
+      let d_y = target.pos.y - self.entity.pos.y;
+      let target_angle = d_y.atan2(d_x);
 
       self.entity.vel_to_angle();
-      if angle_diff.abs() >= ANGLE_INCREMENT {
-        if angle_diff < 0.0 {
-          self.entity.angle -= ANGLE_INCREMENT * (props.delta as f64 / 30.0);
-        } else {
-          self.entity.angle += ANGLE_INCREMENT * (props.delta as f64 / 30.0);
-        }
-        self.entity.angle_to_vel();
+
+      let mut angle_diff = target_angle - self.entity.angle;
+
+      if angle_diff > PI as f64 {
+        angle_diff -= 2.0 * PI as f64;
       }
+      if angle_diff < -PI as f64 {
+        angle_diff += 2.0 * PI as f64;
+      }
+
+      let max_turn = ANGLE_INCREMENT * (props.delta as f64 / 16.67);
+      if angle_diff.abs() < max_turn {
+        self.entity.angle = target_angle;
+      } else {
+        self.entity.angle += angle_diff.sin() * max_turn;
+      }
+
+      self.entity.angle_to_vel();
     }
 
     self.entity.update(props);

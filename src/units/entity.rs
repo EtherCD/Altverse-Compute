@@ -1,7 +1,7 @@
 use std::f32::consts::PI;
 
 use crate::{
-  assets::entity::Enemies,
+  assets::entity::EnemyWrapper,
   network::PackedEntity,
   units::{
     player::Player,
@@ -30,7 +30,7 @@ pub struct Entity {
   pub state_metadata: f64,
   pub alpha: f64,
 
-  pub nested_entities: Vec<Enemies>,
+  pub nested_entities: Vec<EnemyWrapper>,
 }
 
 impl Entity {
@@ -130,7 +130,7 @@ impl Entity {
       state: self.state,
       aura: self.aura,
       state_metadata: self.state_metadata,
-      alpha: self.alpha,
+      alpha: (self.alpha * 100.0).round() / 100.0,
     }
   }
 }
