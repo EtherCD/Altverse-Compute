@@ -1,3 +1,4 @@
+use crate::resources::player::Player;
 use rand::rngs::ThreadRng;
 use rand::Rng;
 use std::cell::RefCell;

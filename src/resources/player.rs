@@ -1,8 +1,9 @@
-use crate::packager::PackedPlayer;
+use crate::proto::PackedPlayer;
 use crate::resources::utils::input::Input;
 use crate::resources::utils::join::JoinProps;
 use crate::resources::utils::vector::Vector;
-use crate::resources::{Boundary, UpdateProps};
+use crate::resources::{distance, Boundary, UpdateProps};
+use crate::CONFIG;
 
 #[derive(Clone)]
 pub struct Player {
@@ -51,7 +52,7 @@ impl Player {
       state: 0,
       state_meta: 0.0,
       world: spawn.world,
-      area: spawn.area,
+      area: spawn.area as u64,
       to_delete: false,
     }
   }
@@ -177,20 +178,20 @@ impl Player {
   }
   pub fn pack(&self) -> PackedPlayer {
     PackedPlayer {
-      id: self.id,
+      id: self.id as u64,
       name: self.name.clone(),
-      x: (self.pos.x * 10.0).round() / 10.0,
-      y: (self.pos.y * 10.0).round() / 10.0,
-      radius: self.radius,
-      speed: self.speed,
-      energy: self.energy,
-      max_energy: self.max_energy,
-      death_timer: self.death_timer.round(),
+      x: ((self.pos.x * 10.0).round() / 10.0) as f32,
+      y: ((self.pos.y * 10.0).round() / 10.0) as f32,
+      radius: self.radius.round() as f32,
+      speed: self.speed as f32,
+      energy: self.energy as f32,
+      max_energy: self.max_energy as f32,
+      death_timer: self.death_timer.round() as f32,
       state: self.state,
       area: self.area.clone(),
       world: self.world.clone(),
       died: self.downed,
-      state_meta: self.state_meta,
+      state_meta: self.state_meta as f32,
     }
   }
 }

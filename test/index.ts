@@ -1,9 +1,6 @@
 import ge from '..'
-import { App } from 'uWebSockets.js'
-import { WebSocket } from 'uWebSockets.js'
+import { App, WebSocket } from 'uWebSockets.js'
 import fs from 'fs'
-import path from 'path'
-import { decode, decodeBlock } from 'lz4'
 
 const worldsDir = fs.readdirSync('./test/worlds')
 let worlds = []
@@ -15,36 +12,36 @@ for (const world in worldsDir) {
 }
 const config = fs.readFileSync('./test/config.json') + ''
 
-const engine = new ge.Game(new ge.GameProps(config, worlds))
+const engine = new ge.ComputeEngine(new ge.EngineProps(config, worlds))
 
 let lastId = 0
 let clients = new Map<number, WebSocket<Client>>()
-let clientsInput: Record<number, ge.InputProps> = {}
-const accessedKeys = ['left', 'right', 'up', 'down', 'shift']
+let clientsInput: Record<number, ge.Input> = {}
+// const accessedKeys = ['left', 'right', 'up', 'down', 'shift']
 
 interface Client {
   id: number
-  input: ge.InputProps
+  input: ge.Input
   packages: object[]
   username: string
 }
 
-engine.onPlayerDeath((id) => {
-  if (clients.get(id)) {
-    clients.get(id)?.close
-  }
-  return null
-})
+// engine.onPlayerDeath((id) => {
+//   if (clients.get(id)) {
+//     clients.get(id)?.close
+//   }
+//   return null
+// })
 
 App()
   .ws<Client>('/server', {
     open: (ws) => {
       const data = ws.getUserData()
       data.id = lastId++
-      data.input = new ge.InputProps()
+      data.input = new ge.Input()
       data.packages = []
       data.username = ''
-      clientsInput[lastId - 1] = new ge.InputProps()
+      clientsInput[lastId - 1] = new ge.Input()
       // logger.info(`User connected ${data.id}`)
       clients.set(data.id, ws)
     },

@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package game;
+
+message PackedEntity {
+  uint64 type_id = 1;
+  float x = 2;
+  float y = 3;
+  float radius = 4;
+  bool harmless = 5;
+  float aura = 6;
+  uint64 state = 7;
+  float state_metadata = 8;
+  float alpha = 9;
+}
+
+
+message PackedPlayer {
+  string name = 1;
+  uint64 id = 2;
+  float x = 3;
+  float y = 4;
+  float radius = 5;
+  float speed = 6;
+  float energy = 7;
+  float max_energy = 8;
+  float death_timer = 9;
+  uint64 state = 10;
+  float state_meta = 11;
+  uint64 area = 12;
+  string world = 13;
+  bool died = 14;
+}
+
+message PackedArea {
+  float w = 1;
+  float h = 2;
+  uint64 area = 3;
+  string world = 4;
+  map<uint64, PackedEntity> entities = 5;
+}
+
+message Package {
+  oneof kind {
+    PackedPlayer new_player = 1;
+    int64 close_player = 2;
+    Players players = 3;
+    Entities new_entities = 4;
+    CloseEntities close_entities = 5;
+    PackedArea area_init = 6;
+    PackedPlayer myself = 7;
+    Players players_update = 8;
+  }
+}
+
+message Packages {
+  repeated Package items = 1;
+}
+
+message Players {
+  map<int64, PackedPlayer> players = 1;
+}
+
+message Entities {
+  map<int64, PackedEntity> entities = 1;
+}
+
+message CloseEntities {
+  repeated int64 ids = 1;
+}
+

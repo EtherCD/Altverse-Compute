@@ -1,28 +1,65 @@
-use crate::packager::Package;
+use crate::proto::package::Kind;
+use crate::proto::{Package, Packages};
+use crate::resources::utils::input::Input;
 use std::collections::HashMap;
 
-pub struct PackagesBus {
-  packages: HashMap<i64, Vec<Package>>,
-  players_id: Vec<i64>,
+pub struct Client {
+  pub packages: Packages,
+  pub input: Input,
 }
 
-impl PackagesBus {
+pub struct NetworkBus {
+  pub clients: HashMap<i64, Client>,
+}
+
+impl NetworkBus {
   pub fn new() -> Self {
     Self {
-      packages: HashMap::new(),
-      players_id: Vec::new(),
+      clients: HashMap::new(),
     }
   }
 
-  pub fn add_global_package(&mut self, package: Package) {
-    for (id, packages) in self.packages.iter_mut() {
-      packages.push(package.clone());
+  pub fn add_client(&mut self, player_id: i64) {
+    self.clients.insert(
+      player_id,
+      Client {
+        input: Input::new(),
+        packages: Packages { items: Vec::new() },
+      },
+    );
+  }
+
+  pub fn remove_client(&mut self, player_id: i64) {
+    if let Some(_) = self.clients.get(&player_id) {
+      self.clients.remove(&player_id);
     }
   }
 
-  pub fn add_direct_package(&mut self, id: i64, package: Package) {
-    if let Some(packages) = self.packages.get_mut(&id) {
-      packages.push(package);
+  pub fn accept_input(&mut self, id: i64, input: &Input) {
+    if let Some(client) = self.clients.get_mut(&id) {
+      client.input = input.clone();
+    }
+  }
+
+  pub fn add_global_package(&mut self, package: Kind) {
+    for mut client in self.clients.values_mut() {
+      client.packages.items.push(Package {
+        kind: Some(package.clone()),
+      });
+    }
+  }
+
+  pub fn add_direct_package(&mut self, id: i64, package: Kind) {
+    if let Some(client) = self.clients.get_mut(&id) {
+      client.packages.items.push(Package {
+        kind: Some(package),
+      });
+    }
+  }
+
+  pub fn clear_packages(&mut self) {
+    for (_, client) in self.clients.iter_mut() {
+      client.packages.items.clear();
     }
   }
 }
@@ -43,6 +80,6 @@ impl InteractBus {
   }
 
   pub fn push_event(&mut self, event: Interact) {
-    self.events.push(event);
+    // self.events.push(event);
   }
 }

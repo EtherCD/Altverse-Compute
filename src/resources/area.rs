@@ -1,5 +1,5 @@
 use crate::config::RawArea;
-use crate::packager::PackedEntity;
+use crate::proto::PackedEntity;
 use crate::resources::entity::Entity;
 use crate::resources::player::Player;
 use crate::resources::{Boundary, EntityProps};
@@ -23,23 +23,25 @@ impl Area {
   }
 
   pub fn join(&mut self, id: i64) {
+    if self.players_id.len() == 0 {
+      self.init();
+    }
     self.players_id.push(id);
-    if self.players_id.len() != 0 {}
   }
 
   pub fn leave(&mut self, id: i64) {
-    self.players_id.remove(id as usize);
+    self.players_id.retain(|&item| item != id);
     if self.players_id.len() == 0 {
       self.entities.clear();
-      self.next_id = 0;
+      // self.next_id = 0;
     }
   }
 
-  pub fn get_packed_entities(&self) -> HashMap<i64, PackedEntity> {
-    let mut packed_entities: HashMap<i64, PackedEntity> = HashMap::new();
+  pub fn get_packed_entities(&self) -> HashMap<u64, PackedEntity> {
+    let mut packed_entities: HashMap<u64, PackedEntity> = HashMap::new();
 
     for (id, entity) in self.entities.iter() {
-      packed_entities.insert(*id as i64, entity.pack());
+      packed_entities.insert(*id, entity.pack());
     }
 
     packed_entities

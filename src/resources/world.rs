@@ -1,5 +1,5 @@
 use crate::config::RawWorld;
-use crate::packager::PackedArea;
+use crate::proto::PackedArea;
 use crate::resources::area::Area;
 use crate::resources::player::Player;
 
@@ -18,23 +18,25 @@ impl World {
   }
 
   pub fn join(&mut self, player: &Player) {
-    if let Some(area) = self.areas.get_mut(player.id as usize) {
+    if let Some(area) = self.areas.get_mut(player.area as usize) {
       area.join(player.id);
+      println!("Join {} {}", player.name, player.id);
     }
   }
 
   pub fn leave(&mut self, player: &Player) {
-    if let Some(area) = self.areas.get_mut(player.id as usize) {
+    if let Some(area) = self.areas.get_mut(player.area as usize) {
       area.leave(player.id);
+      println!("Leave {} {}", player.name, player.id);
     }
   }
 
-  pub fn pack_area(&mut self, area_id: usize) -> PackedArea {
+  pub fn pack_area(&self, area_id: usize) -> PackedArea {
     let area = self.areas.get(area_id).unwrap();
     PackedArea {
-      w: area.raw_area.w,
-      h: area.raw_area.h,
-      area: area_id as u32,
+      w: area.raw_area.w as f32,
+      h: area.raw_area.h as f32,
+      area: area_id as u64,
       world: self.raw_world.name.clone(),
       entities: area.get_packed_entities(),
     }

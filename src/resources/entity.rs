@@ -1,9 +1,8 @@
-use std::f32::consts::PI;
-
-use crate::packager::PackedEntity;
+use crate::proto::PackedEntity;
 use crate::resources::player::Player;
 use crate::resources::utils::vector::Vector;
 use crate::resources::{distance, random, Boundary, EntityProps, EntityUpdateProps};
+use std::f32::consts::PI;
 
 #[derive(Clone)]
 pub struct Entity {
@@ -114,14 +113,14 @@ impl Entity {
   pub fn pack(&self) -> PackedEntity {
     PackedEntity {
       type_id: self.type_id,
-      x: (self.pos.x * 10.0).round() / 10.0,
-      y: (self.pos.y * 10.0).round() / 10.0,
-      radius: self.radius,
+      x: ((self.pos.x * 10.0).round() / 10.0) as f32,
+      y: ((self.pos.y * 10.0).round() / 10.0) as f32,
+      radius: self.radius as f32,
       harmless: self.harmless,
       state: self.state,
-      aura: self.aura,
-      state_metadata: self.state_metadata,
-      alpha: (self.alpha * 100.0).round() / 100.0,
+      aura: self.aura as f32,
+      state_metadata: self.state_metadata as f32,
+      alpha: ((self.alpha * 100.0).round() / 100.0) as f32,
     }
   }
 }
