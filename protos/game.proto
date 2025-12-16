@@ -3,59 +3,59 @@ syntax = "proto3";
 package game;
 
 message PackedEntity {
-  uint64 type_id = 1;
-  float x = 2;
-  float y = 3;
-  float radius = 4;
+  uint32 type_id = 1;
+  int32 x = 2;
+  int32 y = 3;
+  int32 radius = 4;
   bool harmless = 5;
-  float aura = 6;
-  uint64 state = 7;
-  float state_metadata = 8;
-  float alpha = 9;
+  int32 aura = 6;
+  uint32 state = 7;
+  int32 state_metadata = 8;
+  int32 alpha = 9;
 }
 
 message PackedPlayer {
   string name = 1;
-  uint64 id = 2;
-  float x = 3;
-  float y = 4;
-  float radius = 5;
-  float speed = 6;
-  float energy = 7;
-  float max_energy = 8;
-  float death_timer = 9;
-  uint64 state = 10;
-  float state_meta = 11;
-  uint64 area = 12;
+  uint32 id = 2;
+  int32 x = 3;
+  int32 y = 4;
+  int32 radius = 5;
+  int32 speed = 6;
+  int32 energy = 7;
+  int32 max_energy = 8;
+  int32 death_timer = 9;
+  uint32 state = 10;
+  int32 state_meta = 11;
+  uint32 area = 12;
   string world = 13;
   bool died = 14;
 }
 
 message PartialEntity {
-  optional uint64 type_id = 1;
-  optional float x = 2;
-  optional float y = 3;
-  optional float radius = 4;
+  optional uint32 type_id = 1;
+  optional int32 x = 2;
+  optional int32 y = 3;
+  optional int32 radius = 4;
   optional bool harmless = 5;
-  optional float aura = 6;
-  optional uint64 state = 7;
-  optional float state_metadata = 8;
-  optional float alpha = 9;
+  optional int32 aura = 6;
+  optional uint32 state = 7;
+  optional int32 state_metadata = 8;
+  optional int32 alpha = 9;
 }
 
 message PartialPlayer {
   optional string name = 1;
-  optional uint64 id = 2;
-  optional float x = 3;
-  optional float y = 4;
-  optional float radius = 5;
-  optional float speed = 6;
-  optional float energy = 7;
-  optional float max_energy = 8;
-  optional float death_timer = 9;
-  optional uint64 state = 10;
-  optional float state_meta = 11;
-  optional uint64 area = 12;
+  optional uint32 id = 2;
+  optional int32 x = 3;
+  optional int32 y = 4;
+  optional int32 radius = 5;
+  optional int32 speed = 6;
+  optional int32 energy = 7;
+  optional int32 max_energy = 8;
+  optional int32 death_timer = 9;
+  optional uint32 state = 10;
+  optional int32 state_meta = 11;
+  optional uint32 area = 12;
   optional string world = 13;
   optional bool died = 14;
 }

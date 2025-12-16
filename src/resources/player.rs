@@ -178,20 +178,20 @@ impl Player {
   }
   pub fn pack(&self) -> PackedPlayer {
     PackedPlayer {
-      id: self.id as u64,
+      id: self.id as u32,
       name: self.name.clone(),
-      x: ((self.pos.x * 10.0).round() / 10.0) as f32,
-      y: ((self.pos.y * 10.0).round() / 10.0) as f32,
-      radius: self.radius.round() as f32,
-      speed: self.speed as f32,
-      energy: self.energy as f32,
-      max_energy: self.max_energy as f32,
-      death_timer: self.death_timer.round() as f32,
-      state: self.state,
-      area: self.area.clone(),
+      x: (self.pos.x * 10.0).round() as i32,
+      y: (self.pos.y * 10.0).round() as i32,
+      radius: (self.radius * 10.0).round() as i32,
+      speed: (self.speed * 10.0).round() as i32,
+      energy: (self.energy * 10.0).round() as i32,
+      max_energy: (self.max_energy * 10.0).round() as i32,
+      death_timer: (self.death_timer * 10.0).round() as i32,
+      state: self.state as u32,
+      area: self.area as u32,
       world: self.world.clone(),
       died: self.downed,
-      state_meta: self.state_meta as f32,
+      state_meta: (self.state_meta * 10.0).round() as i32,
     }
   }
 }

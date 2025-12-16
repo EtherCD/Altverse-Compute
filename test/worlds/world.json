@@ -18,7 +18,7 @@
           "types": ["slower"],
           "radius": 15,
           "speed": 5,
-          "count": 500
+          "count": 20
         }
       ],
       "w": 1920,

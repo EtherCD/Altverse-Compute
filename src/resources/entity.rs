@@ -112,15 +112,15 @@ impl Entity {
 
   pub fn pack(&self) -> PackedEntity {
     PackedEntity {
-      type_id: self.type_id,
-      x: ((self.pos.x * 10.0).round() / 10.0) as f32,
-      y: ((self.pos.y * 10.0).round() / 10.0) as f32,
-      radius: self.radius as f32,
+      type_id: self.type_id as u32,
+      x: (self.pos.x * 10.0).round() as i32,
+      y: (self.pos.y * 10.0).round() as i32,
+      radius: (self.radius * 10.0).round() as i32,
       harmless: self.harmless,
-      state: self.state,
-      aura: self.aura as f32,
-      state_metadata: self.state_metadata as f32,
-      alpha: ((self.alpha * 100.0).round() / 100.0) as f32,
+      state: self.state as u32,
+      aura: (self.aura * 10.0).round() as i32,
+      state_metadata: (self.state_metadata * 10.0).round() as i32,
+      alpha: (self.alpha * 10.0).round() as i32,
     }
   }
 }

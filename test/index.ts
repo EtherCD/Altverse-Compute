@@ -142,7 +142,9 @@ const tick = () => {
   for (const index in clientsInput) {
     engine.input(Number(index), clientsInput[index])
   }
+  console.time('Time')
   const packages = engine.update() as Record<string, Buffer>
+  console.timeEnd('Time')
 
   for (const [id, client] of clients) {
     let pkg = packages[id]

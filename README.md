@@ -29,8 +29,8 @@ npm run test
 
 | Parameter    | Status |
 |--------------|--------|
-| Performance  | 🟢     |
+| Performance  | ⚡⚡⚡    |
 | Playable     | 🔴     |
-| Architecture | 🔴     |
+| Architecture | 🟡     |
 | Stability    | 🟡     |
 
