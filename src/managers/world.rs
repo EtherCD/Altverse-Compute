@@ -1,17 +1,19 @@
 use crate::bus::NetworkBus;
+use crate::config::Config;
+use crate::managers::player::PlayersManager;
 use crate::props::EngineProps;
-use crate::proto::PackedEntity;
+use crate::proto::package::Kind;
+use crate::proto::{PackedEntity, PartialEntity, Players, UpdateEntitiesMap};
 use crate::resources::player::Player;
 use crate::resources::world::World;
 use crate::resources::{distance, EntityUpdateProps, UpdateProps};
-use serde_json::Value;
 use std::collections::HashMap;
 
 pub struct WorldsManager {
   pub worlds: HashMap<String, World>,
   pub new_entities: HashMap<u64, PackedEntity>,
   pub old_entities: HashMap<u64, PackedEntity>,
-  pub entities_diff: HashMap<u64, HashMap<String, Value>>,
+  pub entities_diff: HashMap<i64, PartialEntity>,
 }
 
 pub enum Change {
@@ -87,21 +89,21 @@ impl WorldsManager {
 
         self.new_entities = area.get_packed_entities();
 
-        // for (id, entity) in self.new_entities.iter() {
-        //   if let Some(old_entity) = self.old_entities.get(&id) {
-        //     let diff = old_entity.diff(&entity);
-        //     if diff.len() > 0 {
-        //       self.entities_diff.insert(*id, diff);
-        //     }
-        //   }
-        // }
+        for (id, entity) in self.new_entities.iter() {
+          if let Some(old_entity) = self.old_entities.get(&id) {
+            let diff = old_entity.diff(&entity);
+            self.entities_diff.insert(*id as i64, diff);
+          }
+        }
 
-        // if !self.entities_diff.is_empty() {
-        //   let package = Package::from(OneOfkind::self.entities_diff.clone());
-        //   for id in area.players_id.iter() {
-        //     network_bus.add_direct_package(*id, package);
-        //   }
-        // }
+        if !self.entities_diff.is_empty() {
+          let package = Kind::UpdateEntities(UpdateEntitiesMap {
+            items: self.entities_diff.clone(),
+          });
+          for id in area.players_id.iter() {
+            network_bus.add_direct_package(*id, package.clone());
+          }
+        }
       }
     }
   }
@@ -145,81 +147,87 @@ impl WorldsManager {
     changes
   }
 
-  // pub fn process_warps<'a>(
-  //   &'a mut self,
-  //   players_manager: &'a mut PlayersManager<'a>,
-  //   config: &Config,
-  //   network_bus: &'a mut NetworkBus<'a>,
-  // ) {
-  //   let warps = self.prepare_warps(&players_manager.players);
-  //   for (id, change) in &warps {
-  //     if let Some(player) = players_manager.players.get_mut(&id) {
-  //       match change {
-  //         Change::NextArea => {
-  //           if let Some(world) = self.worlds.get_mut(&player.world) {
-  //             if let Some(area) = world.areas.get_mut(player.area as usize) {
-  //               area.leave(player.id);
-  //             }
-  //             player.area += 1;
-  //             player.pos.x = -8.0 * 32.0 + player.radius;
-  //             let next_area = world.areas.get_mut(player.area as usize).unwrap();
-  //             next_area.join(player.id);
-  //             let area_init_package = OneOfkind::area_init(world.pack_area(player.area as usize));
-  //             network_bus.add_direct_package(*id, area_init_package);
-  //             let players_package = OneOfkind::players(players_manager.pack_players());
-  //             network_bus.add_direct_package(*id, players_package);
-  //           }
-  //         }
-  //         Change::PrevArea => {
-  //           if let Some(world) = self.worlds.get_mut(&player.world) {
-  //             if let Some(area) = world.areas.get_mut(player.area as usize) {
-  //               area.leave(player.id);
-  //             }
-  //             player.area -= 1;
-  //             let prev_area = world.areas.get_mut(player.area as usize).unwrap();
-  //             prev_area.join(player.id);
-  //             player.pos.x = prev_area.raw_area.w + 8.0 * 32.0 - player.radius;
-  //             let area_init_package = OneOfkind::area_init(world.pack_area(player.area as usize));
-  //             network_bus.add_direct_package(*id, area_init_package);
-  //             let players_package = OneOfkind::players(players_manager.pack_players());
-  //             network_bus.add_direct_package(*id, players_package);
-  //           }
-  //         }
-  //         Change::NextWorld => {
-  //           if let Some(prev_world) = self.worlds.get_mut(&player.world) {
-  //             prev_world.leave(player);
-  //           }
-  //           let next_world_name = WorldsManager::get_next_world(&config.worlds, &player.world);
-  //           let next_world = self.worlds.get_mut(&next_world_name).unwrap();
-  //           let area = next_world.areas.get_mut(0).unwrap();
-  //           player.world = next_world_name;
-  //           player.pos.y = area.raw_area.h - player.radius - 2.0 * 32.0;
-  //           next_world.join(player);
-  //           let area_init_package =
-  //             OneOfkind::area_init(next_world.pack_area(player.area as usize));
-  //           network_bus.add_direct_package(*id, area_init_package);
-  //           let players_package = OneOfkind::players(players_manager.pack_players());
-  //           network_bus.add_direct_package(*id, players_package);
-  //         }
-  //         Change::PrevWorld => {
-  //           if let Some(prev_world) = self.worlds.get_mut(&player.world) {
-  //             prev_world.leave(player);
-  //           }
-  //           let prev_world_name = WorldsManager::get_prev_world(&config.worlds, &player.world);
-  //           let prev_world = self.worlds.get_mut(&prev_world_name).unwrap();
-  //           player.world = prev_world_name;
-  //           player.pos.y = player.radius + 2.0 * 32.0;
-  //           prev_world.join(player);
-  //           let area_init_package =
-  //             OneOfkind::area_init(prev_world.pack_area(player.area as usize));
-  //           network_bus.add_direct_package(*id, area_init_package);
-  //           let players_package = OneOfkind::players(players_manager.pack_players());
-  //           network_bus.add_direct_package(*id, players_package);
-  //         }
-  //       };
-  //     }
-  //   }
-  // }
+  pub fn process_warps(
+    &mut self,
+    players_manager: &mut PlayersManager,
+    config: &Config,
+    network_bus: &mut NetworkBus,
+  ) {
+    let warps = self.prepare_warps(&players_manager.players);
+    for (id, change) in &warps {
+      if let Some(player) = players_manager.players.get_mut(&id) {
+        match change {
+          Change::NextArea => {
+            if let Some(world) = self.worlds.get_mut(&player.world) {
+              if let Some(area) = world.areas.get_mut(player.area as usize) {
+                area.leave(player.id);
+              }
+              player.area += 1;
+              player.pos.x = -8.0 * 32.0 + player.radius;
+              let next_area = world.areas.get_mut(player.area as usize).unwrap();
+              next_area.join(player.id);
+              let area_init_package = Kind::AreaInit(world.pack_area(player.area as usize));
+              network_bus.add_direct_package(*id, area_init_package);
+              let players_package = Kind::Players(Players {
+                players: players_manager.pack_players(),
+              });
+              network_bus.add_direct_package(*id, players_package);
+            }
+          }
+          Change::PrevArea => {
+            if let Some(world) = self.worlds.get_mut(&player.world) {
+              if let Some(area) = world.areas.get_mut(player.area as usize) {
+                area.leave(player.id);
+              }
+              player.area -= 1;
+              let prev_area = world.areas.get_mut(player.area as usize).unwrap();
+              prev_area.join(player.id);
+              player.pos.x = prev_area.raw_area.w + 8.0 * 32.0 - player.radius;
+              let area_init_package = Kind::AreaInit(world.pack_area(player.area as usize));
+              network_bus.add_direct_package(*id, area_init_package);
+              let players_package = Kind::Players(Players {
+                players: players_manager.pack_players(),
+              });
+              network_bus.add_direct_package(*id, players_package);
+            }
+          }
+          Change::NextWorld => {
+            if let Some(prev_world) = self.worlds.get_mut(&player.world) {
+              prev_world.leave(player);
+            }
+            let next_world_name = WorldsManager::get_next_world(&config.worlds, &player.world);
+            let next_world = self.worlds.get_mut(&next_world_name).unwrap();
+            let area = next_world.areas.get_mut(0).unwrap();
+            player.world = next_world_name;
+            player.pos.y = area.raw_area.h - player.radius - 2.0 * 32.0;
+            next_world.join(player);
+            let area_init_package = Kind::AreaInit(next_world.pack_area(player.area as usize));
+            network_bus.add_direct_package(*id, area_init_package);
+            let players_package = Kind::Players(Players {
+              players: players_manager.pack_players(),
+            });
+            network_bus.add_direct_package(*id, players_package);
+          }
+          Change::PrevWorld => {
+            if let Some(prev_world) = self.worlds.get_mut(&player.world) {
+              prev_world.leave(player);
+            }
+            let prev_world_name = WorldsManager::get_prev_world(&config.worlds, &player.world);
+            let prev_world = self.worlds.get_mut(&prev_world_name).unwrap();
+            player.world = prev_world_name;
+            player.pos.y = player.radius + 2.0 * 32.0;
+            prev_world.join(player);
+            let area_init_package = Kind::AreaInit(prev_world.pack_area(player.area as usize));
+            network_bus.add_direct_package(*id, area_init_package);
+            let players_package = Kind::Players(Players {
+              players: players_manager.pack_players(),
+            });
+            network_bus.add_direct_package(*id, players_package);
+          }
+        };
+      }
+    }
+  }
 
   fn send_update_packages(&mut self) {}
 

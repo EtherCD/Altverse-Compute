@@ -1,19 +1,18 @@
 use crate::bus::NetworkBus;
 use crate::proto::package::Kind;
-use crate::proto::{PackedPlayer, Players};
+use crate::proto::{PackedPlayer, PartialPlayer, Players, UpdatePlayersMap};
 use crate::resources::player::Player;
 use crate::resources::utils::join::JoinProps;
 use crate::resources::world::World;
 use crate::resources::UpdateProps;
 use napi::{Error, Status};
-use serde_json::Value;
 use std::collections::HashMap;
 
 pub struct PlayersManager {
   pub players: HashMap<i64, Player>,
   pub start_packages: HashMap<i64, PackedPlayer>,
   pub end_packages: HashMap<i64, PackedPlayer>,
-  pub players_diff: HashMap<i64, HashMap<String, Value>>,
+  pub players_diff: HashMap<i64, PartialPlayer>,
 }
 
 impl PlayersManager {
@@ -110,18 +109,18 @@ impl PlayersManager {
 
     self.end_packages = self.pack_players();
 
-    // for (id, player) in self.end_packages.iter() {
-    //   if let Some(old_player) = self.start_packages.get(&id) {
-    //     let diff = old_player.diff(&player);
-    //     if diff.len() > 0 {
-    //       self.players_diff.insert(*id, diff);
-    //     }
-    //   }
-    // }
+    for (id, player) in self.end_packages.iter() {
+      if let Some(old_player) = self.start_packages.get(&id) {
+        let diff = old_player.diff(&player);
+        self.players_diff.insert(*id, diff);
+      }
+    }
 
-    // if !self.players_diff.is_empty() {
-    //   network_bus.add_global_package(OneOfkind::(self.players_diff.clone()));
-    // }
+    if !self.players_diff.is_empty() {
+      network_bus.add_global_package(Kind::UpdatePlayers(UpdatePlayersMap {
+        items: self.players_diff.clone(),
+      }))
+    }
   }
 
   // pub fn update_interact(
@@ -138,7 +137,7 @@ impl PlayersManager {
   //   }
   // }
 
-  fn pack_players(&self) -> HashMap<i64, PackedPlayer> {
+  pub(crate) fn pack_players(&self) -> HashMap<i64, PackedPlayer> {
     let mut result = HashMap::new();
 
     for (id, player) in self.players.iter() {

@@ -23,7 +23,6 @@ pub mod proto {
 mod bus;
 mod config;
 mod managers;
-mod packager;
 mod props;
 mod resources;
 
@@ -106,9 +105,9 @@ impl ComputeEngine {
       &mut self.players_manager.players,
       &mut self.network_bus,
     );
-    // self
-    //   .worlds_manager
-    //   .process_warps(&mut self.players_manager, &config, &mut self.network_bus);
+    self
+      .worlds_manager
+      .process_warps(&mut self.players_manager, &config, &mut self.network_bus);
 
     self.packages_as_napi(env)
   }
@@ -117,15 +116,17 @@ impl ComputeEngine {
     let mut object = Object::new(env)?;
 
     for (index, client) in self.network_bus.clients.iter_mut() {
-      let key = env.create_string(index.to_string())?;
-      self.proto_buffer.clear();
-      if let Ok(_) = prost::Message::encode(&client.packages, &mut self.proto_buffer) {
-        let mut slice: &[u8] = self.proto_buffer.as_slice();
-        let mut compressor = FrameEncoder::new(Vec::new());
-        io::copy(&mut slice, &mut compressor)?;
-        if let Ok(buffer) = compressor.finish() {
-          let uint8 = Uint8ArraySlice::from_data(env, buffer)?;
-          object.set_property(key, uint8)?;
+      if client.packages.items.len() != 0 {
+        let key = env.create_string(index.to_string())?;
+        self.proto_buffer.clear();
+        if let Ok(_) = prost::Message::encode(&client.packages, &mut self.proto_buffer) {
+          let mut slice: &[u8] = self.proto_buffer.as_slice();
+          let mut compressor = FrameEncoder::new(Vec::new());
+          io::copy(&mut slice, &mut compressor)?;
+          if let Ok(buffer) = compressor.finish() {
+            let uint8 = Uint8ArraySlice::from_data(env, buffer)?;
+            object.set_property(key, uint8)?;
+          }
         }
       }
     }

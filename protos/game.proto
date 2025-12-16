@@ -14,7 +14,6 @@ message PackedEntity {
   float alpha = 9;
 }
 
-
 message PackedPlayer {
   string name = 1;
   uint64 id = 2;
@@ -31,6 +30,36 @@ message PackedPlayer {
   string world = 13;
   bool died = 14;
 }
+
+message PartialEntity {
+  optional uint64 type_id = 1;
+  optional float x = 2;
+  optional float y = 3;
+  optional float radius = 4;
+  optional bool harmless = 5;
+  optional float aura = 6;
+  optional uint64 state = 7;
+  optional float state_metadata = 8;
+  optional float alpha = 9;
+}
+
+message PartialPlayer {
+  optional string name = 1;
+  optional uint64 id = 2;
+  optional float x = 3;
+  optional float y = 4;
+  optional float radius = 5;
+  optional float speed = 6;
+  optional float energy = 7;
+  optional float max_energy = 8;
+  optional float death_timer = 9;
+  optional uint64 state = 10;
+  optional float state_meta = 11;
+  optional uint64 area = 12;
+  optional string world = 13;
+  optional bool died = 14;
+}
+
 
 message PackedArea {
   float w = 1;
@@ -49,7 +78,8 @@ message Package {
     CloseEntities close_entities = 5;
     PackedArea area_init = 6;
     PackedPlayer myself = 7;
-    Players players_update = 8;
+    UpdateEntitiesMap update_entities = 8;
+    UpdatePlayersMap update_players = 9;
   }
 }
 
@@ -67,5 +97,13 @@ message Entities {
 
 message CloseEntities {
   repeated int64 ids = 1;
+}
+
+message UpdateEntitiesMap {
+  map<int64, PartialEntity> items = 1;
+}
+
+message UpdatePlayersMap {
+  map<int64, PartialPlayer> items = 1;
 }
 
