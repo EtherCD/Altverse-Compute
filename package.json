@@ -29,6 +29,7 @@
   "scripts": {
     "artifacts": "napi artifacts",
     "build": "napi build --platform --release",
+    "build:proto": "pbjs -t static-module -w es6 -o protos/index.js protos/*.proto && pbts -o protos/index.d.ts protos/index.js",
     "build:debug": "napi build --platform",
     "format": "run-p format:prettier format:rs format:toml",
     "format:prettier": "prettier . -w",
@@ -53,6 +54,8 @@
     "npm-run-all2": "^8.0.4",
     "oxlint": "^1.14.0",
     "prettier": "^3.6.2",
+    "protobufjs": "^7.5.4",
+    "protobufjs-cli": "1.1.3",
     "tinybench": "^6.0.0",
     "tsx": "^4.21.0",
     "typescript": "^5.9.2",

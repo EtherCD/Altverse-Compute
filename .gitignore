@@ -130,4 +130,5 @@ Cargo.lock
 /npm
 .idea
 
-protos
+protos/index.js
+protos/index.d.ts
