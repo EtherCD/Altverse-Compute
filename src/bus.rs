@@ -1,5 +1,6 @@
 use crate::proto::package::Kind;
 use crate::proto::{Package, Packages};
+use crate::resources::assets::entity::EntityWrapper;
 use crate::resources::utils::input::Input;
 use std::collections::HashMap;
 
@@ -64,22 +65,23 @@ impl NetworkBus {
   }
 }
 
-enum Interact {
-  KNOK,
+#[derive(Clone)]
+pub enum Event {
+  EntitySpawn { entity: EntityWrapper },
 }
 
-pub struct InteractBus {
-  events: HashMap<i64, Vec<Interact>>,
+pub struct EventBus {
+  pub entities_to_spawn: Vec<EntityWrapper>,
 }
 
-impl InteractBus {
+impl EventBus {
   pub fn new() -> Self {
     Self {
-      events: HashMap::new(),
+      entities_to_spawn: Vec::new(),
     }
   }
 
-  pub fn push_event(&mut self, event: Interact) {
-    // self.events.push(event);
+  pub fn add_entity(&mut self, entity: EntityWrapper) {
+    self.entities_to_spawn.push(entity);
   }
 }

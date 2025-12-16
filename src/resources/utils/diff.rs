@@ -26,7 +26,6 @@ impl PackedEntity {
       y: diff_field!(self, new, y),
       radius: diff_field!(self, new, radius),
       harmless: diff_field!(self, new, harmless),
-      aura: diff_field!(self, new, aura),
       state: diff_field!(self, new, state),
       state_metadata: diff_field!(self, new, state_metadata),
       alpha: diff_field!(self, new, alpha),

@@ -1,10 +1,12 @@
+use crate::bus::EventBus;
 use crate::resources::player::Player;
 use rand::rngs::ThreadRng;
 use rand::Rng;
 use std::cell::RefCell;
 
 mod area;
-mod entity;
+pub mod assets;
+pub mod entity;
 pub mod player;
 pub mod utils;
 pub mod world;
@@ -35,6 +37,7 @@ pub struct EntityUpdateProps<'a> {
   pub delta: i64,
   pub time_fix: f64,
   pub players: Vec<&'a Player>,
+  pub event_bus: &'a mut EventBus,
 }
 
 pub struct UpdateProps {

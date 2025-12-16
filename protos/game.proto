@@ -6,12 +6,11 @@ message PackedEntity {
   uint32 type_id = 1;
   int32 x = 2;
   int32 y = 3;
-  int32 radius = 4;
+  uint32 radius = 4;
   bool harmless = 5;
-  int32 aura = 6;
   uint32 state = 7;
-  int32 state_metadata = 8;
-  int32 alpha = 9;
+  uint32 state_metadata = 8;
+  uint32 alpha = 9;
 }
 
 message PackedPlayer {
@@ -19,13 +18,13 @@ message PackedPlayer {
   uint32 id = 2;
   int32 x = 3;
   int32 y = 4;
-  int32 radius = 5;
-  int32 speed = 6;
-  int32 energy = 7;
-  int32 max_energy = 8;
-  int32 death_timer = 9;
+  uint32 radius = 5;
+  uint32 speed = 6;
+  uint32 energy = 7;
+  uint32 max_energy = 8;
+  uint32 death_timer = 9;
   uint32 state = 10;
-  int32 state_meta = 11;
+  uint32 state_meta = 11;
   uint32 area = 12;
   string world = 13;
   bool died = 14;
@@ -35,12 +34,11 @@ message PartialEntity {
   optional uint32 type_id = 1;
   optional int32 x = 2;
   optional int32 y = 3;
-  optional int32 radius = 4;
+  optional uint32 radius = 4;
   optional bool harmless = 5;
-  optional int32 aura = 6;
   optional uint32 state = 7;
-  optional int32 state_metadata = 8;
-  optional int32 alpha = 9;
+  optional uint32 state_metadata = 8;
+  optional uint32 alpha = 9;
 }
 
 message PartialPlayer {
@@ -48,13 +46,13 @@ message PartialPlayer {
   optional uint32 id = 2;
   optional int32 x = 3;
   optional int32 y = 4;
-  optional int32 radius = 5;
-  optional int32 speed = 6;
-  optional int32 energy = 7;
-  optional int32 max_energy = 8;
-  optional int32 death_timer = 9;
+  optional uint32 radius = 5;
+  optional uint32 speed = 6;
+  optional uint32 energy = 7;
+  optional uint32 max_energy = 8;
+  optional uint32 death_timer = 9;
   optional uint32 state = 10;
-  optional int32 state_meta = 11;
+  optional uint32 state_meta = 11;
   optional uint32 area = 12;
   optional string world = 13;
   optional bool died = 14;

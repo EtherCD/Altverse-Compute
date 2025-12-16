@@ -1,12 +1,12 @@
 use crate::config::RawArea;
 use crate::proto::PackedEntity;
-use crate::resources::entity::Entity;
+use crate::resources::assets::entity::EntityWrapper;
 use crate::resources::player::Player;
-use crate::resources::{Boundary, EntityProps};
+use crate::resources::{random, AdditionalEntityProps, Boundary, EntityProps};
 use std::collections::HashMap;
 
 pub struct Area {
-  pub entities: HashMap<u64, Entity>,
+  pub entities: HashMap<u64, EntityWrapper>,
   pub players_id: Vec<i64>,
   pub raw_area: RawArea,
   pub next_id: u64,
@@ -61,25 +61,31 @@ impl Area {
             h: self.raw_area.h,
           },
         };
-        for _ in 0..entity.count {
-          // let type_name = entity
-          //   .types
-          //   .get(random(0.0, entity.types.len() as f64 - 1.0).round() as usize)
-          //   .unwrap();
-          // let additional = AdditionalEntityProps {
-          //   count: entity.count as u64,
-          //   num: num as u64,
-          //   inverse: false,
-          // };
+        for num in 0..entity.count {
+          let type_name = entity
+            .types
+            .get(random(0.0, entity.types.len() as f64 - 1.0).round() as usize)
+            .unwrap();
+          let additional = AdditionalEntityProps {
+            count: entity.count as u64,
+            num: num as u64,
+            inverse: false,
+          };
 
-          // if let Ok(entity) = EnemyW/**/rapper::new(type_name.as_str(), &mut props.clone(), additional)
-          // {
-          self.entities.insert(self.next_id, Entity::new(props));
-          self.next_id += 1;
-          // }
+          if let Ok(entity) = EntityWrapper::new(type_name.as_str(), &mut props.clone(), additional)
+          {
+            self.entities.insert(self.next_id, entity);
+            self.next_id += 1;
+          }
         }
       }
     }
+  }
+
+  pub fn add_entity(&mut self, entity: EntityWrapper) -> u64 {
+    self.entities.insert(self.next_id, entity);
+    self.next_id += 1;
+    self.next_id
   }
 
   pub fn get_players_vec<'a>(&self, players: &'a HashMap<i64, Player>) -> Vec<&'a Player> {

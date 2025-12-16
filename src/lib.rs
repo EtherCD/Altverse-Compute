@@ -1,12 +1,12 @@
 // #[deny(clippy::all)]
-use crate::bus::NetworkBus;
+use crate::bus::{EventBus, NetworkBus};
 use crate::config::Config;
 use crate::managers::player::PlayersManager;
 use crate::managers::world::WorldsManager;
 use crate::props::EngineProps;
+use crate::resources::UpdateProps;
 use crate::resources::utils::input::Input;
 use crate::resources::utils::join::JoinProps;
-use crate::resources::UpdateProps;
 use chrono::Utc;
 use lazy_static::lazy_static;
 use lz4_flex::frame::FrameEncoder;
@@ -35,6 +35,7 @@ pub struct ComputeEngine {
   players_manager: PlayersManager,
   worlds_manager: WorldsManager,
   network_bus: NetworkBus,
+  event_bus: EventBus,
   proto_buffer: Vec<u8>,
 
   last_timestamp: i64,
@@ -55,6 +56,7 @@ impl ComputeEngine {
       network_bus: NetworkBus::new(),
       last_timestamp: Utc::now().timestamp_millis(),
       proto_buffer: Vec::with_capacity(1024),
+      event_bus: EventBus::new(),
     })
   }
 
@@ -104,6 +106,7 @@ impl ComputeEngine {
       &update_props,
       &mut self.players_manager.players,
       &mut self.network_bus,
+      &mut self.event_bus,
     );
     self
       .worlds_manager

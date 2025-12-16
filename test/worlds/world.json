@@ -15,10 +15,10 @@
           "count": 10
         },
         {
-          "types": ["slower"],
+          "types": ["flame", "normal"],
           "radius": 15,
           "speed": 5,
-          "count": 20
+          "count": 10
         }
       ],
       "w": 1920,

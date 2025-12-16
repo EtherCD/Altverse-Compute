@@ -115,12 +115,11 @@ impl Entity {
       type_id: self.type_id as u32,
       x: (self.pos.x * 10.0).round() as i32,
       y: (self.pos.y * 10.0).round() as i32,
-      radius: (self.radius * 10.0).round() as i32,
+      radius: (self.radius * 10.0).round().abs() as u32,
       harmless: self.harmless,
       state: self.state as u32,
-      aura: (self.aura * 10.0).round() as i32,
-      state_metadata: (self.state_metadata * 10.0).round() as i32,
-      alpha: (self.alpha * 10.0).round() as i32,
+      state_metadata: (self.state_metadata * 10.0).round().abs() as u32,
+      alpha: (self.alpha * 100.0).round().abs() as u32,
     }
   }
 }

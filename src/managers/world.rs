@@ -1,9 +1,11 @@
-use crate::bus::NetworkBus;
+use crate::bus::{EventBus, NetworkBus};
 use crate::config::Config;
 use crate::managers::player::PlayersManager;
 use crate::props::EngineProps;
 use crate::proto::package::Kind;
-use crate::proto::{PackedEntity, PartialEntity, Players, UpdateEntitiesMap};
+use crate::proto::{
+  CloseEntities, Entities, PackedEntity, PartialEntity, Players, UpdateEntitiesMap,
+};
 use crate::resources::player::Player;
 use crate::resources::world::World;
 use crate::resources::{distance, EntityUpdateProps, UpdateProps};
@@ -14,6 +16,8 @@ pub struct WorldsManager {
   pub new_entities: HashMap<u64, PackedEntity>,
   pub old_entities: HashMap<u64, PackedEntity>,
   pub entities_diff: HashMap<i64, PartialEntity>,
+  pub spawned_entities: HashMap<i64, PackedEntity>,
+  pub entities_to_remove: Vec<i64>,
 }
 
 pub enum Change {
@@ -30,6 +34,8 @@ impl WorldsManager {
       new_entities: HashMap::new(),
       old_entities: HashMap::new(),
       entities_diff: HashMap::new(),
+      spawned_entities: HashMap::new(),
+      entities_to_remove: Vec::new(),
     }
   }
 
@@ -38,21 +44,31 @@ impl WorldsManager {
     props: &UpdateProps,
     players: &mut HashMap<i64, Player>,
     network_bus: &mut NetworkBus,
+    event_bus: &mut EventBus,
   ) {
     for world in self.worlds.values_mut() {
       for area in world.areas.iter_mut() {
         self.old_entities = area.get_packed_entities();
-        self.entities_diff.clear();
+        event_bus.entities_to_spawn.clear();
 
-        let entity_update = EntityUpdateProps {
+        let mut entity_update = EntityUpdateProps {
           delta: props.delta,
           time_fix: props.time_fix,
           players: area.get_players_vec(&players),
+          event_bus,
         };
 
+        area.entities.retain(|id, entity| {
+          if entity.is_to_remove() {
+            self.entities_to_remove.push(*id as i64);
+            false
+          } else {
+            true
+          }
+        });
+
         for (_, entity) in area.entities.iter_mut() {
-          entity.update(&entity_update);
-          entity.collide();
+          entity.update(&mut entity_update);
         }
 
         for (_, entity) in area.entities.iter_mut() {
@@ -87,6 +103,11 @@ impl WorldsManager {
           }
         }
 
+        for entity in event_bus.entities_to_spawn.iter() {
+          let id = area.add_entity(entity.clone());
+          self.spawned_entities.insert(id as i64, entity.pack());
+        }
+
         self.new_entities = area.get_packed_entities();
 
         for (id, entity) in self.new_entities.iter() {
@@ -96,6 +117,26 @@ impl WorldsManager {
           }
         }
 
+        if !self.spawned_entities.is_empty() {
+          let package = Kind::NewEntities(Entities {
+            entities: self.spawned_entities.clone(),
+          });
+          for id in area.players_id.iter() {
+            network_bus.add_direct_package(*id, package.clone());
+          }
+          self.spawned_entities.clear();
+        }
+
+        if !self.entities_to_remove.is_empty() {
+          let package = Kind::CloseEntities(CloseEntities {
+            ids: self.entities_to_remove.clone(),
+          });
+          for id in area.players_id.iter() {
+            network_bus.add_direct_package(*id, package.clone());
+          }
+          self.entities_to_remove.clear();
+        }
+
         if !self.entities_diff.is_empty() {
           let package = Kind::UpdateEntities(UpdateEntitiesMap {
             items: self.entities_diff.clone(),
@@ -103,6 +144,7 @@ impl WorldsManager {
           for id in area.players_id.iter() {
             network_bus.add_direct_package(*id, package.clone());
           }
+          self.entities_diff.clear();
         }
       }
     }
