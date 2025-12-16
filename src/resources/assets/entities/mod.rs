@@ -1,13 +1,18 @@
 use crate::proto::PackedEntity;
-use crate::resources::player::Player;
+use crate::resources::assets::hero::HeroWrapper;
+use crate::resources::entity::Entity;
 use crate::resources::EntityUpdateProps;
 
+pub mod fade;
 pub mod flame;
 pub mod normal;
+pub mod slow;
+pub mod wall;
 
 pub trait EntityLogic {
   fn update(&mut self, props: &mut EntityUpdateProps);
-  fn interact(&mut self, player: &mut Player);
+  fn interact(&mut self, player: &mut HeroWrapper);
   fn pack(&self) -> PackedEntity;
-  fn is_to_remove(&self) -> bool;
+  fn entity(&self) -> &Entity;
+  fn entity_mut(&mut self) -> &mut Entity;
 }

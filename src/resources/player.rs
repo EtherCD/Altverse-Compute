@@ -2,10 +2,10 @@ use crate::proto::PackedPlayer;
 use crate::resources::utils::input::Input;
 use crate::resources::utils::join::JoinProps;
 use crate::resources::utils::vector::Vector;
-use crate::resources::{distance, Boundary, UpdateProps};
+use crate::resources::{distance, Boundary, PlayerUpdateProps};
 use crate::CONFIG;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Player {
   pub name: String,
   pub id: i64,
@@ -25,9 +25,10 @@ pub struct Player {
   pub death_timer: f64,
 
   pub immortal: bool,
-  state: u64,
-  state_meta: f64,
+  pub state: u64,
+  pub state_meta: f64,
   pub to_delete: bool,
+  pub hero: u32,
 }
 
 impl Player {
@@ -54,10 +55,11 @@ impl Player {
       world: spawn.world,
       area: spawn.area as u64,
       to_delete: false,
+      hero: 0,
     }
   }
 
-  pub fn update(&mut self, props: &UpdateProps) {
+  pub fn update(&mut self, props: &PlayerUpdateProps) {
     let time_fix = props.time_fix;
 
     let mut slide = [self.slide.x, self.slide.y];
@@ -144,13 +146,6 @@ impl Player {
       self.acc.x = dist_movement * self.angle.cos();
       self.acc.y = dist_movement * self.angle.sin();
     }
-
-    if input.first_ability {
-      input.first_ability = false;
-    }
-    if input.second_ability {
-      input.second_ability = false;
-    }
   }
 
   pub fn knock(&mut self) {
@@ -192,6 +187,7 @@ impl Player {
       world: self.world.clone(),
       died: self.downed,
       state_meta: (self.state_meta * 10.0).round().abs() as u32,
+      hero: self.hero,
     }
   }
 }

@@ -10,15 +10,9 @@
       "enemies": [
         {
           "types": ["wall"],
-          "radius": 15,
+          "radius": 10,
           "speed": 5,
-          "count": 10
-        },
-        {
-          "types": ["flame", "normal"],
-          "radius": 15,
-          "speed": 5,
-          "count": 10
+          "count": 75
         }
       ],
       "w": 1920,

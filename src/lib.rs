@@ -4,16 +4,14 @@ use crate::config::Config;
 use crate::managers::player::PlayersManager;
 use crate::managers::world::WorldsManager;
 use crate::props::EngineProps;
-use crate::resources::UpdateProps;
 use crate::resources::utils::input::Input;
 use crate::resources::utils::join::JoinProps;
+use crate::resources::UpdateProps;
 use chrono::Utc;
 use lazy_static::lazy_static;
-use lz4_flex::frame::FrameEncoder;
 use napi::bindgen_prelude::{JsObjectValue, Object, Uint8ArraySlice};
 use napi::{Env, Error};
 use napi_derive::napi;
-use std::io;
 use std::sync::Mutex;
 
 pub mod proto {
@@ -45,7 +43,7 @@ pub struct ComputeEngine {
 impl ComputeEngine {
   #[napi(constructor)]
   pub fn new(props: &EngineProps) -> Result<Self, Error> {
-    let worlds = props.load_worlds()?;
+    // let worlds = props.load_worlds()?;
     let config = props.load_config()?;
 
     *CONFIG.lock().unwrap() = config.clone();
@@ -67,7 +65,7 @@ impl ComputeEngine {
       player_props,
       &mut self.worlds_manager.worlds,
       &mut self.network_bus,
-    );
+    )?;
     Ok(())
   }
 
@@ -97,20 +95,20 @@ impl ComputeEngine {
 
     let update_props = UpdateProps { delta, time_fix };
 
-    self.players_manager.update_behavior(
-      &update_props,
-      &mut self.worlds_manager.worlds,
-      &mut self.network_bus,
-    );
     self.worlds_manager.update(
       &update_props,
-      &mut self.players_manager.players,
+      &mut self.players_manager,
       &mut self.network_bus,
       &mut self.event_bus,
     );
     self
       .worlds_manager
       .process_warps(&mut self.players_manager, &config, &mut self.network_bus);
+    self.players_manager.update_behavior(
+      &update_props,
+      &mut self.worlds_manager.worlds,
+      &mut self.network_bus,
+    );
 
     self.packages_as_napi(env)
   }
@@ -123,13 +121,13 @@ impl ComputeEngine {
         let key = env.create_string(index.to_string())?;
         self.proto_buffer.clear();
         if let Ok(_) = prost::Message::encode(&client.packages, &mut self.proto_buffer) {
-          let mut slice: &[u8] = self.proto_buffer.as_slice();
-          let mut compressor = FrameEncoder::new(Vec::new());
-          io::copy(&mut slice, &mut compressor)?;
-          if let Ok(buffer) = compressor.finish() {
-            let uint8 = Uint8ArraySlice::from_data(env, buffer)?;
-            object.set_property(key, uint8)?;
-          }
+          let slice: &[u8] = self.proto_buffer.as_slice();
+          // let mut compressor = FrameEncoder::new(Vec::new());
+          // io::copy(&mut slice, &mut compressor)?;
+          // if let Ok(buffer) = compressor.finish() {
+          let uint8 = Uint8ArraySlice::from_data(env, slice)?;
+          object.set_property(key, uint8)?;
+          // }
         }
       }
     }

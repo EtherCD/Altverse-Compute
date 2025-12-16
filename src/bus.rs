@@ -43,7 +43,7 @@ impl NetworkBus {
   }
 
   pub fn add_global_package(&mut self, package: Kind) {
-    for mut client in self.clients.values_mut() {
+    for client in self.clients.values_mut() {
       client.packages.items.push(Package {
         kind: Some(package.clone()),
       });

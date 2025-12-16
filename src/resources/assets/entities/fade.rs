@@ -5,22 +5,38 @@ use crate::resources::entity::Entity;
 use crate::resources::{AdditionalEntityProps, EntityProps, EntityUpdateProps};
 
 #[derive(Clone)]
-pub struct Normal {
+pub struct Fade {
   entity: Entity,
+  timer: f64,
 }
 
-impl Normal {
-  pub fn new(props: EntityProps, _: AdditionalEntityProps) -> Self {
+const MAX_TIME: f64 = 7500.0;
+const START_TIME: f64 = 7500.0 / 2.0;
+
+impl Fade {
+  pub fn new(props: EntityProps, additional: AdditionalEntityProps) -> Self {
     let mut entity = Entity::new(props);
-    entity.type_id = 0;
-    Self { entity }
+    let mut timer = 0.0;
+    if additional.num > additional.count / 2 {
+      timer = START_TIME;
+    }
+    entity.type_id = 23;
+    Self { entity, timer }
   }
 }
 
-impl EntityLogic for Normal {
+impl EntityLogic for Fade {
   fn update(&mut self, props: &mut EntityUpdateProps) {
     self.entity.update(props);
     self.entity.collide();
+
+    self.timer += props.delta as f64;
+
+    let period = MAX_TIME;
+
+    let phase = (self.timer / period) * std::f64::consts::TAU;
+    self.entity.alpha = (phase.cos() + 1.0) * 0.5;
+    self.entity.harmless = self.entity.alpha < 0.5;
   }
 
   fn interact(&mut self, player: &mut HeroWrapper) {

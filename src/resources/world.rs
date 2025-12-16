@@ -20,7 +20,6 @@ impl World {
   pub fn join(&mut self, player: &Player) {
     if let Some(area) = self.areas.get_mut(player.area as usize) {
       area.join(player.id);
-      println!("Join {} {}", player.name, player.id);
     }
   }
 

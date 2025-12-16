@@ -108,6 +108,7 @@ App()
             // mouseEnable(ws, data.mouseEnable!)
             break
           case 'ability':
+            console.log(data.ability)
             if (data.ability === 'first') input.setFirstAbility(true)
             if (data.ability === 'second') input.setSecondAbility(true)
             break
@@ -141,6 +142,7 @@ const tick = () => {
   clearTimeout(timeout)
   for (const index in clientsInput) {
     engine.input(Number(index), clientsInput[index])
+    clientsInput[index].setFirstAbility(false)
   }
   const packages = engine.update() as Record<string, Buffer>
 

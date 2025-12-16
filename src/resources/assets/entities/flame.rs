@@ -1,8 +1,8 @@
 use crate::proto::PackedEntity;
 use crate::resources::assets::entities::EntityLogic;
 use crate::resources::assets::entity::EntityWrapper;
+use crate::resources::assets::hero::HeroWrapper;
 use crate::resources::entity::Entity;
-use crate::resources::player::Player;
 use crate::resources::{AdditionalEntityProps, EntityProps, EntityUpdateProps};
 
 #[derive(Clone)]
@@ -47,7 +47,7 @@ impl EntityLogic for Flame {
     }
   }
 
-  fn interact(&mut self, player: &mut Player) {
+  fn interact(&mut self, player: &mut HeroWrapper) {
     self.entity.interact(player);
   }
 
@@ -55,8 +55,12 @@ impl EntityLogic for Flame {
     self.entity.pack()
   }
 
-  fn is_to_remove(&self) -> bool {
-    self.entity.to_remove
+  fn entity(&self) -> &Entity {
+    &self.entity
+  }
+
+  fn entity_mut(&mut self) -> &mut Entity {
+    &mut self.entity
   }
 }
 
@@ -92,7 +96,7 @@ impl EntityLogic for FlameTrail {
     }
   }
 
-  fn interact(&mut self, player: &mut Player) {
+  fn interact(&mut self, player: &mut HeroWrapper) {
     self.entity.interact(player);
   }
 
@@ -100,7 +104,11 @@ impl EntityLogic for FlameTrail {
     self.entity.pack()
   }
 
-  fn is_to_remove(&self) -> bool {
-    self.entity.to_remove
+  fn entity(&self) -> &Entity {
+    &self.entity
+  }
+
+  fn entity_mut(&mut self) -> &mut Entity {
+    &mut self.entity
   }
 }

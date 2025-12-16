@@ -45,6 +45,12 @@ pub struct UpdateProps {
   pub time_fix: f64,
 }
 
+pub struct PlayerUpdateProps<'a> {
+  pub delta: i64,
+  pub time_fix: f64,
+  pub players: Vec<&'a Player>,
+}
+
 #[derive(Clone, Copy)]
 pub struct AdditionalEntityProps {
   pub count: u64,

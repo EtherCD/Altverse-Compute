@@ -1,6 +1,7 @@
 use crate::config::RawArea;
 use crate::proto::PackedEntity;
 use crate::resources::assets::entity::EntityWrapper;
+use crate::resources::assets::hero::HeroWrapper;
 use crate::resources::player::Player;
 use crate::resources::{random, AdditionalEntityProps, Boundary, EntityProps};
 use std::collections::HashMap;
@@ -33,7 +34,7 @@ impl Area {
     self.players_id.retain(|&item| item != id);
     if self.players_id.len() == 0 {
       self.entities.clear();
-      // self.next_id = 0;
+      self.next_id = 0;
     }
   }
 
@@ -88,12 +89,12 @@ impl Area {
     self.next_id
   }
 
-  pub fn get_players_vec<'a>(&self, players: &'a HashMap<i64, Player>) -> Vec<&'a Player> {
-    let mut arr: Vec<&Player> = Vec::new();
+  pub fn get_players_vec<'a>(&self, players: &'a HashMap<i64, HeroWrapper>) -> Vec<&'a Player> {
+    let mut arr = Vec::new();
 
     for id in &self.players_id {
       if let Some(player) = players.get(id) {
-        arr.push(player);
+        arr.push(player.player());
       }
     }
 

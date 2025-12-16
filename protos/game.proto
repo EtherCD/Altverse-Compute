@@ -3,11 +3,11 @@ syntax = "proto3";
 package game;
 
 message PackedEntity {
-  uint32 type_id = 1;
-  int32 x = 2;
-  int32 y = 3;
-  uint32 radius = 4;
-  bool harmless = 5;
+  uint32 type_id = 2;
+  uint32 x = 3;
+  uint32 y = 4;
+  uint32 radius = 5;
+  bool harmless = 6;
   uint32 state = 7;
   uint32 state_metadata = 8;
   uint32 alpha = 9;
@@ -16,8 +16,8 @@ message PackedEntity {
 message PackedPlayer {
   string name = 1;
   uint32 id = 2;
-  int32 x = 3;
-  int32 y = 4;
+  sfixed32 x = 3;
+  sfixed32 y = 4;
   uint32 radius = 5;
   uint32 speed = 6;
   uint32 energy = 7;
@@ -28,12 +28,12 @@ message PackedPlayer {
   uint32 area = 12;
   string world = 13;
   bool died = 14;
+  uint32 hero = 15;
 }
 
 message PartialEntity {
-  optional uint32 type_id = 1;
-  optional int32 x = 2;
-  optional int32 y = 3;
+  optional uint32 x = 2;
+  optional uint32 y = 3;
   optional uint32 radius = 4;
   optional bool harmless = 5;
   optional uint32 state = 7;
@@ -42,10 +42,8 @@ message PartialEntity {
 }
 
 message PartialPlayer {
-  optional string name = 1;
-  optional uint32 id = 2;
-  optional int32 x = 3;
-  optional int32 y = 4;
+  optional sfixed32 x = 3;
+  optional sfixed32 y = 4;
   optional uint32 radius = 5;
   optional uint32 speed = 6;
   optional uint32 energy = 7;
@@ -86,22 +84,22 @@ message Packages {
 }
 
 message Players {
-  map<int64, PackedPlayer> players = 1;
+  map<uint32, PackedPlayer> players = 1;
 }
 
 message Entities {
-  map<int64, PackedEntity> entities = 1;
+  map<uint32, PackedEntity> entities = 1;
 }
 
 message CloseEntities {
-  repeated int64 ids = 1;
+  repeated uint32 ids = 1;
 }
 
 message UpdateEntitiesMap {
-  map<int64, PartialEntity> items = 1;
+  map<uint32, PartialEntity> items = 1;
 }
 
 message UpdatePlayersMap {
-  map<int64, PartialPlayer> items = 1;
+  map<uint32, PartialPlayer> items = 1;
 }
 

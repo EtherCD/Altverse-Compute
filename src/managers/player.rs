@@ -1,18 +1,18 @@
 use crate::bus::NetworkBus;
 use crate::proto::package::Kind;
 use crate::proto::{PackedPlayer, PartialPlayer, Players, UpdatePlayersMap};
-use crate::resources::player::Player;
+use crate::resources::assets::hero::HeroWrapper;
 use crate::resources::utils::join::JoinProps;
 use crate::resources::world::World;
-use crate::resources::UpdateProps;
+use crate::resources::{PlayerUpdateProps, UpdateProps};
 use napi::{Error, Status};
 use std::collections::HashMap;
 
 pub struct PlayersManager {
-  pub players: HashMap<i64, Player>,
-  pub start_packages: HashMap<i64, PackedPlayer>,
-  pub end_packages: HashMap<i64, PackedPlayer>,
-  pub players_diff: HashMap<i64, PartialPlayer>,
+  pub players: HashMap<i64, HeroWrapper>,
+  pub start_packages: HashMap<u32, PackedPlayer>,
+  pub end_packages: HashMap<u32, PackedPlayer>,
+  pub players_diff: HashMap<u32, PartialPlayer>,
 }
 
 impl PlayersManager {
@@ -31,26 +31,24 @@ impl PlayersManager {
     worlds: &mut HashMap<String, World>,
     network_bus: &mut NetworkBus,
   ) -> Result<(), Error> {
-    let player = Player::new(player_props.clone());
-    let player_id = player.id;
-    let world_name = player.world.clone();
+    let hero = HeroWrapper::new("maven", player_props.clone())?;
+    let player = hero.player().clone();
+    let player_id = hero.player().id;
+    let world_name = hero.player().world.clone();
 
-    self.players.insert(player_id, player);
-    // Теперь можем безопасно получить ссылку
-    if let Some(player_ref) = self.players.get(&player_id) {
+    self.players.insert(player_id, hero);
+    if let Some(_) = self.players.get(&player_id) {
       if let Some(world) = worlds.get_mut(&world_name) {
-        world.join(player_ref);
+        world.join(&player);
 
-        let packed_player = player_ref.pack();
+        let packed_player = player.pack();
 
         network_bus.add_global_package(Kind::NewPlayer(packed_player.clone()));
         network_bus.add_direct_package(
           player_id,
-          Kind::AreaInit(world.pack_area(player_ref.area as usize)),
+          Kind::AreaInit(world.pack_area(player.area as usize)),
         );
 
-        // Проблема в pack_players() - она возвращает HashMap с ссылками
-        // Решение: создать owned версию
         let players = self.pack_players();
 
         network_bus.add_direct_package(player_id, Kind::Players(Players { players }));
@@ -73,7 +71,8 @@ impl PlayersManager {
     worlds: &mut HashMap<String, World>,
     network_bus: &mut NetworkBus,
   ) {
-    if let Some(player) = self.players.get(&player_id) {
+    if let Some(hero) = self.players.get(&player_id) {
+      let player = hero.player();
       if let Some(world) = worlds.get_mut(&player.world) {
         world.leave(&player);
       }
@@ -94,14 +93,22 @@ impl PlayersManager {
       self.players_diff.clear();
     }
 
-    for (id, player) in self.players.iter_mut() {
+    let players_clone = &self.players.clone();
+
+    for (id, hero) in self.players.iter_mut() {
+      let player = hero.player();
       if let Some(worlds) = worlds.get_mut(&player.world) {
         if let Some(area) = worlds.areas.get_mut(player.area as usize) {
-          player.update(update_props);
+          let update_player_props = PlayerUpdateProps {
+            time_fix: update_props.time_fix,
+            delta: update_props.delta,
+            players: area.get_players_vec(&players_clone),
+          };
+          hero.update(&update_player_props);
           let boundary = area.as_boundary_player();
-          player.collide(boundary);
+          hero.collide(boundary);
           if let Some(client) = network_bus.clients.get_mut(id) {
-            player.input(&mut client.input);
+            hero.input(&mut client.input);
           }
         }
       }
@@ -111,8 +118,10 @@ impl PlayersManager {
 
     for (id, player) in self.end_packages.iter() {
       if let Some(old_player) = self.start_packages.get(&id) {
-        let diff = old_player.diff(&player);
-        self.players_diff.insert(*id, diff);
+        let (diff, changed) = old_player.diff(&player);
+        if changed {
+          self.players_diff.insert(*id, diff);
+        }
       }
     }
 
@@ -137,11 +146,11 @@ impl PlayersManager {
   //   }
   // }
 
-  pub(crate) fn pack_players(&self) -> HashMap<i64, PackedPlayer> {
+  pub(crate) fn pack_players(&self) -> HashMap<u32, PackedPlayer> {
     let mut result = HashMap::new();
 
-    for (id, player) in self.players.iter() {
-      result.insert(*id, player.pack());
+    for (id, hero) in self.players.iter() {
+      result.insert(*id as u32, hero.pack());
     }
 
     result
