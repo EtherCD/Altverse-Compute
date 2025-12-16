@@ -4,8 +4,8 @@
     "speed": 17,
     "max_speed": 17,
     "regeneration": 7,
-    "energy": 0,
-    "max_energy": 30,
+    "energy": 300,
+    "max_energy": 300,
     "world": "Melancholic Meadows",
     "area": 0,
 

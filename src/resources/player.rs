@@ -181,7 +181,7 @@ impl Player {
       speed: (self.speed * 10.0).round().abs() as u32,
       energy: (self.energy * 10.0).round().abs() as u32,
       max_energy: (self.max_energy * 10.0).round().abs() as u32,
-      death_timer: (self.death_timer * 10.0).round().abs() as u32,
+      death_timer: self.death_timer.round() as u32,
       state: self.state as u32,
       area: self.area as u32,
       world: self.world.clone(),

@@ -1,6 +1,9 @@
 use crate::proto::PackedEntity;
+use crate::resources::assets::entities::drop::Drop;
 use crate::resources::assets::entities::fade::Fade;
 use crate::resources::assets::entities::flame::{Flame, FlameTrail};
+use crate::resources::assets::entities::flamesniper::{FlameBullet, FlameSniper};
+use crate::resources::assets::entities::immune::Immune;
 use crate::resources::assets::entities::normal::Normal;
 use crate::resources::assets::entities::wall::Wall;
 use crate::resources::assets::entities::EntityLogic;
@@ -17,6 +20,10 @@ macro_rules! entity_dispatch {
       EntityWrapper::FlameTrail(v) => v.$method($($arg),*),
       EntityWrapper::Fade(v) => v.$method($($arg),*),
       EntityWrapper::Wall(v) => v.$method($($arg),*),
+      EntityWrapper::FlameBullet(v) => v.$method($($arg),*),
+      EntityWrapper::FlameSniper(v) => v.$method($($arg),*),
+      EntityWrapper::Immune(v) => v.$method($($arg),*),
+      EntityWrapper::Drop(v) => v.$method($($arg),*),
     }
   };
 }
@@ -28,6 +35,10 @@ pub enum EntityWrapper {
   FlameTrail(FlameTrail),
   Fade(Fade),
   Wall(Wall),
+  FlameBullet(FlameBullet),
+  FlameSniper(FlameSniper),
+  Immune(Immune),
+  Drop(Drop),
 }
 
 impl EntityWrapper {
@@ -41,6 +52,11 @@ impl EntityWrapper {
       "flame" => Ok(EntityWrapper::Flame(Flame::new(*props, additional))),
       "fade" => Ok(EntityWrapper::Fade(Fade::new(*props, additional))),
       "wall" => Ok(EntityWrapper::Wall(Wall::new(*props, additional))),
+      "immune" => Ok(EntityWrapper::Immune(Immune::new(*props, additional))),
+      "flame_sniper" => Ok(EntityWrapper::FlameSniper(FlameSniper::new(
+        *props, additional,
+      ))),
+      "drop" => Ok(EntityWrapper::Drop(Drop::new(*props, additional))),
       _ => Err(Error::new(
         Status::InvalidArg,
         "Unknown enemy type: ".to_string() + name,

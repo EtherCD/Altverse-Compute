@@ -49,6 +49,7 @@ pub struct PlayerUpdateProps<'a> {
   pub delta: i64,
   pub time_fix: f64,
   pub players: Vec<&'a Player>,
+  pub event_bus: &'a mut EventBus,
 }
 
 #[derive(Clone, Copy)]

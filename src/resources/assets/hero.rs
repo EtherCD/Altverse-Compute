@@ -30,7 +30,7 @@ impl HeroWrapper {
       )),
     }
   }
-  pub fn update(&mut self, props: &PlayerUpdateProps) {
+  pub fn update(&mut self, props: &mut PlayerUpdateProps) {
     hero_dispatch!(self, update(props));
   }
   pub fn input(&mut self, input: &mut Input) {

@@ -5,6 +5,7 @@ export declare class ComputeEngine {
   join(playerProps: JoinProps): void
   leave(playerId: number): void
   input(id: number, input: Input): void
+  onPlayerDeath(callback: (arg: number) => null): void
   update(): object
 }
 

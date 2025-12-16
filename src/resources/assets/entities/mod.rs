@@ -3,8 +3,11 @@ use crate::resources::assets::hero::HeroWrapper;
 use crate::resources::entity::Entity;
 use crate::resources::EntityUpdateProps;
 
+pub mod drop;
 pub mod fade;
 pub mod flame;
+pub mod flamesniper;
+pub mod immune;
 pub mod normal;
 pub mod slow;
 pub mod wall;

@@ -9,6 +9,8 @@ use crate::resources::utils::join::JoinProps;
 use crate::resources::UpdateProps;
 use chrono::Utc;
 use lazy_static::lazy_static;
+use napi::bindgen_prelude::Function;
+use napi::bindgen_prelude::Null;
 use napi::bindgen_prelude::{JsObjectValue, Object, Uint8ArraySlice};
 use napi::{Env, Error};
 use napi_derive::napi;
@@ -37,6 +39,7 @@ pub struct ComputeEngine {
   proto_buffer: Vec<u8>,
 
   last_timestamp: i64,
+  player_death_callback: Option<Function<'static, i64, Null>>,
 }
 
 #[napi]
@@ -55,6 +58,7 @@ impl ComputeEngine {
       last_timestamp: Utc::now().timestamp_millis(),
       proto_buffer: Vec::with_capacity(1024),
       event_bus: EventBus::new(),
+      player_death_callback: None,
     })
   }
 
@@ -85,6 +89,11 @@ impl ComputeEngine {
   }
 
   #[napi]
+  pub fn on_player_death(&mut self, callback: Function<'static, i64, Null>) {
+    self.player_death_callback = Some(callback);
+  }
+
+  #[napi]
   pub fn update(&mut self, env: &Env) -> Result<Object<'_>, Error> {
     let config = CONFIG.lock().unwrap();
 
@@ -95,6 +104,7 @@ impl ComputeEngine {
 
     let update_props = UpdateProps { delta, time_fix };
 
+    self.players_manager.snapshot_start();
     self.worlds_manager.update(
       &update_props,
       &mut self.players_manager,
@@ -108,7 +118,16 @@ impl ComputeEngine {
       &update_props,
       &mut self.worlds_manager.worlds,
       &mut self.network_bus,
+      &mut self.event_bus,
     );
+    self.players_manager.snapshot_end(&mut self.network_bus);
+
+    if let Some(callback) = self.player_death_callback {
+      for id in self.players_manager.check_players_to_remove() {
+        self.leave(id as i64);
+        let _ = callback.call(id as i64);
+      }
+    }
 
     self.packages_as_napi(env)
   }

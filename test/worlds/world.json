@@ -12,7 +12,19 @@
           "types": ["wall"],
           "radius": 10,
           "speed": 5,
-          "count": 75
+          "count": 10
+        },
+        {
+          "types": ["drop"],
+          "radius": 10,
+          "speed": 5,
+          "count": 50
+        },
+        {
+          "types": ["flame_sniper"],
+          "radius": 30,
+          "speed": 5,
+          "count": 2
         }
       ],
       "w": 1920,

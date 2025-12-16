@@ -1,4 +1,4 @@
-use crate::bus::NetworkBus;
+use crate::bus::{EventBus, NetworkBus};
 use crate::proto::package::Kind;
 use crate::proto::{PackedPlayer, PartialPlayer, Players, UpdatePlayersMap};
 use crate::resources::assets::hero::HeroWrapper;
@@ -13,6 +13,7 @@ pub struct PlayersManager {
   pub start_packages: HashMap<u32, PackedPlayer>,
   pub end_packages: HashMap<u32, PackedPlayer>,
   pub players_diff: HashMap<u32, PartialPlayer>,
+  pub players_to_remove: Vec<u32>,
 }
 
 impl PlayersManager {
@@ -22,6 +23,7 @@ impl PlayersManager {
       start_packages: HashMap::new(),
       end_packages: HashMap::new(),
       players_diff: HashMap::new(),
+      players_to_remove: Vec::new(),
     }
   }
 
@@ -82,39 +84,13 @@ impl PlayersManager {
     network_bus.add_global_package(Kind::ClosePlayer(player_id));
   }
 
-  pub fn update_behavior(
-    &mut self,
-    update_props: &UpdateProps,
-    worlds: &mut HashMap<String, World>,
-    network_bus: &mut NetworkBus,
-  ) {
+  pub fn snapshot_start(&mut self) {
     self.start_packages = self.pack_players();
-    if self.players_diff.len() > 0 {
-      self.players_diff.clear();
-    }
+  }
 
-    let players_clone = &self.players.clone();
-
-    for (id, hero) in self.players.iter_mut() {
-      let player = hero.player();
-      if let Some(worlds) = worlds.get_mut(&player.world) {
-        if let Some(area) = worlds.areas.get_mut(player.area as usize) {
-          let update_player_props = PlayerUpdateProps {
-            time_fix: update_props.time_fix,
-            delta: update_props.delta,
-            players: area.get_players_vec(&players_clone),
-          };
-          hero.update(&update_player_props);
-          let boundary = area.as_boundary_player();
-          hero.collide(boundary);
-          if let Some(client) = network_bus.clients.get_mut(id) {
-            hero.input(&mut client.input);
-          }
-        }
-      }
-    }
-
+  pub fn snapshot_end(&mut self, network_bus: &mut NetworkBus) {
     self.end_packages = self.pack_players();
+    self.players_diff.clear();
 
     for (id, player) in self.end_packages.iter() {
       if let Some(old_player) = self.start_packages.get(&id) {
@@ -130,6 +106,50 @@ impl PlayersManager {
         items: self.players_diff.clone(),
       }))
     }
+  }
+
+  pub fn update_behavior(
+    &mut self,
+    update_props: &UpdateProps,
+    worlds: &mut HashMap<String, World>,
+    network_bus: &mut NetworkBus,
+    event_bus: &mut EventBus,
+  ) {
+    let players_clone = &self.players.clone();
+
+    for (id, hero) in self.players.iter_mut() {
+      let player = hero.player();
+      if let Some(worlds) = worlds.get_mut(&player.world) {
+        if let Some(area) = worlds.areas.get_mut(player.area as usize) {
+          let mut update_player_props = PlayerUpdateProps {
+            time_fix: update_props.time_fix,
+            delta: update_props.delta,
+            players: area.get_players_vec(&players_clone),
+            event_bus,
+          };
+          hero.update(&mut update_player_props);
+          let boundary = area.as_boundary_player();
+          hero.collide(boundary);
+          if let Some(client) = network_bus.clients.get_mut(id) {
+            hero.input(&mut client.input);
+          }
+        }
+      }
+    }
+
+    event_bus.process_players_events(&mut self.players);
+  }
+
+  pub fn check_players_to_remove(&mut self) -> Vec<u32> {
+    self.players_to_remove.clear();
+
+    for (id, hero) in self.players.iter_mut() {
+      if hero.player().to_delete {
+        self.players_to_remove.push(*id as u32);
+      }
+    }
+
+    self.players_to_remove.clone()
   }
 
   // pub fn update_interact(

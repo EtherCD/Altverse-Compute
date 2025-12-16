@@ -1,7 +1,9 @@
 use crate::proto::package::Kind;
 use crate::proto::{Package, Packages};
 use crate::resources::assets::entity::EntityWrapper;
+use crate::resources::assets::hero::HeroWrapper;
 use crate::resources::utils::input::Input;
+use crate::resources::utils::vector::Vector;
 use std::collections::HashMap;
 
 pub struct Client {
@@ -66,22 +68,44 @@ impl NetworkBus {
 }
 
 #[derive(Clone)]
-pub enum Event {
-  EntitySpawn { entity: EntityWrapper },
+pub enum PlayerEvent {
+  ResPlayerAndMove { player_id: i64, pos: Vector },
 }
 
 pub struct EventBus {
   pub entities_to_spawn: Vec<EntityWrapper>,
+  pub players_events: Vec<PlayerEvent>,
 }
 
 impl EventBus {
   pub fn new() -> Self {
     Self {
       entities_to_spawn: Vec::new(),
+      players_events: Vec::new(),
     }
   }
 
   pub fn add_entity(&mut self, entity: EntityWrapper) {
     self.entities_to_spawn.push(entity);
+  }
+
+  pub fn respawn_player_and_move(&mut self, player_id: i64, pos: Vector) {
+    self
+      .players_events
+      .push(PlayerEvent::ResPlayerAndMove { player_id, pos });
+  }
+
+  pub fn process_players_events(&mut self, players: &mut HashMap<i64, HeroWrapper>) {
+    for event in self.players_events.iter() {
+      match event {
+        PlayerEvent::ResPlayerAndMove { player_id, pos } => {
+          if let Some(player) = players.get_mut(player_id) {
+            player.res();
+            // player.player_mut().pos.x = pos.x;
+            // player.player_mut().pos.y = pos.y;
+          }
+        }
+      }
+    }
   }
 }

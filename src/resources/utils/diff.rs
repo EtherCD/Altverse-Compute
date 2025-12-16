@@ -82,7 +82,7 @@ impl PackedPlayer {
         state: diff_field!(self, new, state),
         state_meta: diff_field!(self, new, state_meta),
         area: diff_field!(self, new, area),
-        world: diff_field!(self, new, world, clone),
+        world: (self.world != new.world).then(|| new.world.clone()),
         died: (self.died != new.died).then(|| new.died),
       },
       changed,

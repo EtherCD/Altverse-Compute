@@ -6,7 +6,7 @@ use crate::resources::{Boundary, PlayerUpdateProps};
 pub mod maven;
 
 pub trait Hero {
-  fn update(&mut self, props: &PlayerUpdateProps);
+  fn update(&mut self, props: &mut PlayerUpdateProps);
   fn input(&mut self, input: &mut Input);
   fn knock(&mut self);
   fn res(&mut self);

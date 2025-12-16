@@ -26,12 +26,13 @@ interface Client {
   username: string
 }
 
-// engine.onPlayerDeath((id) => {
-//   if (clients.get(id)) {
-//     clients.get(id)?.close
-//   }
-//   return null
-// })
+engine.onPlayerDeath((id) => {
+  console.log(id)
+  if (clients.get(id)) {
+    clients.get(id)?.close()
+  }
+  return null
+})
 
 App()
   .ws<Client>('/server', {
@@ -45,7 +46,7 @@ App()
       // logger.info(`User connected ${data.id}`)
       clients.set(data.id, ws)
     },
-    message: (ws, msg, isBinary) => {
+    message: (ws, msg) => {
       const data = JSON.parse(Buffer.from(msg).toString())
       let client = ws.getUserData()!
 
