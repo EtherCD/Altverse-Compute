@@ -15,16 +15,10 @@
           "count": 10
         },
         {
-          "types": ["drop"],
-          "radius": 10,
+          "types": ["sniper", "homing", "bee"],
+          "radius": 25,
           "speed": 5,
-          "count": 50
-        },
-        {
-          "types": ["flame_sniper"],
-          "radius": 30,
-          "speed": 5,
-          "count": 2
+          "count": 20
         }
       ],
       "w": 1920,

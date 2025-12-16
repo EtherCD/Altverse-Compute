@@ -3,13 +3,16 @@ use crate::resources::assets::hero::HeroWrapper;
 use crate::resources::entity::Entity;
 use crate::resources::EntityUpdateProps;
 
+pub mod bee;
 pub mod drop;
 pub mod fade;
 pub mod flame;
 pub mod flamesniper;
+pub mod homing;
 pub mod immune;
 pub mod normal;
 pub mod slow;
+pub mod sniper;
 pub mod wall;
 
 pub trait EntityLogic {

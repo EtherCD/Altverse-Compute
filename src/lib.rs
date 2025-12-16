@@ -14,6 +14,7 @@ use napi::bindgen_prelude::Null;
 use napi::bindgen_prelude::{JsObjectValue, Object, Uint8ArraySlice};
 use napi::{Env, Error};
 use napi_derive::napi;
+use std::io;
 use std::sync::Mutex;
 
 pub mod proto {
@@ -140,10 +141,8 @@ impl ComputeEngine {
         let key = env.create_string(index.to_string())?;
         self.proto_buffer.clear();
         if let Ok(_) = prost::Message::encode(&client.packages, &mut self.proto_buffer) {
-          let slice: &[u8] = self.proto_buffer.as_slice();
-          // let mut compressor = FrameEncoder::new(Vec::new());
-          // io::copy(&mut slice, &mut compressor)?;
-          // if let Ok(buffer) = compressor.finish() {
+          let slice = self.proto_buffer.as_slice();
+          // if let Ok(buffer) = encoder.compress_vec(slice) {
           let uint8 = Uint8ArraySlice::from_data(env, slice)?;
           object.set_property(key, uint8)?;
           // }

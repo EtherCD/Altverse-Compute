@@ -1,10 +1,13 @@
 use crate::proto::PackedEntity;
+use crate::resources::assets::entities::bee::Bee;
 use crate::resources::assets::entities::drop::Drop;
 use crate::resources::assets::entities::fade::Fade;
 use crate::resources::assets::entities::flame::{Flame, FlameTrail};
 use crate::resources::assets::entities::flamesniper::{FlameBullet, FlameSniper};
+use crate::resources::assets::entities::homing::Homing;
 use crate::resources::assets::entities::immune::Immune;
 use crate::resources::assets::entities::normal::Normal;
+use crate::resources::assets::entities::sniper::{Bullet, Sniper};
 use crate::resources::assets::entities::wall::Wall;
 use crate::resources::assets::entities::EntityLogic;
 use crate::resources::assets::hero::HeroWrapper;
@@ -24,6 +27,10 @@ macro_rules! entity_dispatch {
       EntityWrapper::FlameSniper(v) => v.$method($($arg),*),
       EntityWrapper::Immune(v) => v.$method($($arg),*),
       EntityWrapper::Drop(v) => v.$method($($arg),*),
+      EntityWrapper::Sniper(v) => v.$method($($arg),*),
+      EntityWrapper::Bullet(v) => v.$method($($arg),*),
+      EntityWrapper::Bee(v) => v.$method($($arg),*),
+      EntityWrapper::Homing(v) => v.$method($($arg),*),
     }
   };
 }
@@ -39,6 +46,10 @@ pub enum EntityWrapper {
   FlameSniper(FlameSniper),
   Immune(Immune),
   Drop(Drop),
+  Sniper(Sniper),
+  Bullet(Bullet),
+  Bee(Bee),
+  Homing(Homing),
 }
 
 impl EntityWrapper {
@@ -57,6 +68,9 @@ impl EntityWrapper {
         *props, additional,
       ))),
       "drop" => Ok(EntityWrapper::Drop(Drop::new(*props, additional))),
+      "homing" => Ok(EntityWrapper::Homing(Homing::new(*props, additional))),
+      "bee" => Ok(EntityWrapper::Bee(Bee::new(*props, additional))),
+      "sniper" => Ok(EntityWrapper::Sniper(Sniper::new(*props, additional))),
       _ => Err(Error::new(
         Status::InvalidArg,
         "Unknown enemy type: ".to_string() + name,

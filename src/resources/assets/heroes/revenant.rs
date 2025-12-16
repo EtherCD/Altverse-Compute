@@ -6,14 +6,14 @@ use crate::resources::utils::join::JoinProps;
 use crate::resources::{distance, Boundary, PlayerUpdateProps};
 
 #[derive(Clone)]
-pub struct Maven {
+pub struct Revenant {
   player: Player,
   first_ability_active: bool,
   first_ability_cooldown: f64,
   second_ability_cooldown: f64,
 }
 
-impl Maven {
+impl Revenant {
   pub fn new(props: JoinProps) -> Self {
     Self {
       player: Player::new(props),
@@ -40,7 +40,7 @@ impl Maven {
   }
 }
 
-impl Hero for Maven {
+impl Hero for Revenant {
   fn update(&mut self, props: &mut PlayerUpdateProps) {
     self.player.update(props);
 

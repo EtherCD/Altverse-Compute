@@ -84,8 +84,8 @@ impl Area {
   }
 
   pub fn add_entity(&mut self, entity: EntityWrapper) -> u64 {
-    self.entities.insert(self.next_id, entity);
     self.next_id += 1;
+    self.entities.insert(self.next_id, entity);
     self.next_id
   }
 

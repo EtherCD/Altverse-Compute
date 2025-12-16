@@ -56,7 +56,7 @@ impl WorldsManager {
         let mut entity_update = EntityUpdateProps {
           delta: props.delta,
           time_fix: props.time_fix,
-          players: area.get_players_vec(players),
+          players: area.get_players_vec(&players),
           event_bus,
         };
 
