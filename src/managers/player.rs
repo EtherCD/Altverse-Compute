@@ -146,7 +146,7 @@ impl PlayersManager {
           hero.update(&mut update_player_props);
           let boundary = area.as_boundary_player();
           hero.collide(boundary);
-          if let Some(client) = network_bus.clients.get_mut(id) {
+          if let Some(client) = network_bus.direct_clients.get_mut(id) {
             hero.input(&mut client.input);
           }
         }

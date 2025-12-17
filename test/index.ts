@@ -34,6 +34,11 @@ engine.onPlayerDeath((id) => {
   return null
 })
 
+// for (let i = 0; i < 100; i++) {
+//   engine.join(new JoinProps('EtherCD', i))
+// }
+// lastId = 100
+
 App()
   .ws<Client>('/server', {
     open: (ws) => {
@@ -145,7 +150,9 @@ const tick = () => {
     engine.input(Number(index), clientsInput[index])
     clientsInput[index].setFirstAbility(false)
   }
+  // console.time('Compute Engine')
   const packages = engine.update() as Record<string, Buffer>
+  // console.timeEnd('Compute Engine')
 
   for (const [id, client] of clients) {
     let pkg = packages[id]

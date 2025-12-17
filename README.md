@@ -1,13 +1,20 @@
 <div align="center">
-  <img src="./misc/logotype.svg" width=400/>
-  <p>An Rust game logic for the Altverse game</p>
+    <img src="./misc/logotype.svg" width=400/>
+    <p>A highly optimized game logic module for the <a href="https://github.com/EtherCD/Altverse"> AltVerse </a> project.</p>
+    <p>Stack used</p>
+    <img src="./misc/protobuf.svg" width=100/>
+    <img src="./misc/rust.svg" width=100/>
+    <img src="./misc/node.svg" width=100/>
 </div>
 
-# Usage
+## About
 
-Used in conjunction with the main repository on the napi-rs branch.
+A fun game similar to evades.io.
 
-## Build
+This is a module for a web game project called AltVerse. It was created to optimize and speed up game logic
+calculations. It is currently optimized enough for use.
+
+### Build
 
 To build the module you will need to use cargo/rust
 
@@ -17,7 +24,7 @@ npm run install
 npm run build
 ```
 
-## Test
+### Test
 
 Run the test server after building with
 
@@ -25,12 +32,13 @@ Run the test server after building with
 npm run test
 ```
 
-# Status
+## Status
 
 | Parameter    | Status |
 |--------------|--------|
 | Performance  | ⚡⚡⚡    |
-| Playable     | 🔴     |
-| Architecture | 🟡     |
-| Stability    | 🟡     |
+| Content      | 🔴     |
+| Playable     | 🟡     |
+| Architecture | 🟢     |
+| Stability    | 🟢     |
 

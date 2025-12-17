@@ -48,8 +48,8 @@ impl WorldsManager {
     event_bus: &mut EventBus,
   ) {
     let players = &mut players_manager.players;
-    for world in self.worlds.values_mut() {
-      for area in world.areas.iter_mut() {
+    for (name, world) in self.worlds.iter_mut() {
+      for (index, area) in world.areas.iter_mut().enumerate() {
         self.old_entities = area.get_packed_entities();
         event_bus.entities_to_spawn.clear();
         let boundary = area.as_boundary();
@@ -142,9 +142,7 @@ impl WorldsManager {
           let package = Kind::NewEntities(Entities {
             entities: self.spawned_entities.clone(),
           });
-          for id in area.players_id.iter() {
-            network_bus.add_direct_package(*id, package.clone());
-          }
+          network_bus.add_area_package(name.clone(), index as u64, package.clone());
           self.spawned_entities.clear();
         }
 
@@ -152,9 +150,7 @@ impl WorldsManager {
           let package = Kind::CloseEntities(CloseEntities {
             ids: self.entities_to_remove.clone(),
           });
-          for id in area.players_id.iter() {
-            network_bus.add_direct_package(*id, package.clone());
-          }
+          network_bus.add_area_package(name.clone(), index as u64, package.clone());
           self.entities_to_remove.clear();
         }
 
@@ -162,9 +158,7 @@ impl WorldsManager {
           let package = Kind::UpdateEntities(UpdateEntitiesMap {
             items: self.entities_diff.clone(),
           });
-          for id in area.players_id.iter() {
-            network_bus.add_direct_package(*id, package.clone());
-          }
+          network_bus.add_area_package(name.clone(), index as u64, package.clone());
           self.entities_diff.clear();
         }
       }

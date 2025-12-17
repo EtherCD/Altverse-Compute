@@ -14,6 +14,7 @@ use napi::bindgen_prelude::Null;
 use napi::bindgen_prelude::{JsObjectValue, Object, Uint8ArraySlice};
 use napi::{Env, Error};
 use napi_derive::napi;
+use std::collections::HashMap;
 use std::io;
 use std::sync::Mutex;
 
@@ -136,16 +137,35 @@ impl ComputeEngine {
   fn packages_as_napi(&mut self, env: &Env) -> Result<Object<'_>, Error> {
     let mut object = Object::new(env)?;
 
-    for (index, client) in self.network_bus.clients.iter_mut() {
-      if client.packages.items.len() != 0 {
-        let key = env.create_string(index.to_string())?;
+    let mut built_areas: HashMap<(String, u64), Vec<u8>> = HashMap::new();
+
+    for (key, value) in self.network_bus.area_clients.iter_mut() {
+      let mut proto_buffer = Vec::new();
+      if let Ok(_) = prost::Message::encode(&value.clone(), &mut proto_buffer) {
+        built_areas.insert(key.clone(), proto_buffer);
+      }
+      value.items.clear();
+    }
+
+    for (index, client) in self.network_bus.direct_clients.iter_mut() {
+      if let Some(hero) = self.players_manager.players.get(index) {
         self.proto_buffer.clear();
-        if let Ok(_) = prost::Message::encode(&client.packages, &mut self.proto_buffer) {
-          let slice = self.proto_buffer.as_slice();
-          // if let Ok(buffer) = encoder.compress_vec(slice) {
-          let uint8 = Uint8ArraySlice::from_data(env, slice)?;
-          object.set_property(key, uint8)?;
-          // }
+        let player = hero.player();
+        let key = env.create_string(index.to_string())?;
+        if let Some(buffer) = built_areas.get(&(player.world.clone(), player.area)) {
+          self.proto_buffer = buffer.clone();
+          if let Ok(_) = prost::Message::encode(&client.packages, &mut self.proto_buffer) {
+            let slice = self.proto_buffer.as_slice();
+            let uint8 = Uint8ArraySlice::from_data(env, slice)?;
+            object.set_property(key, uint8)?;
+          }
+        } else {
+          self.proto_buffer = Vec::new();
+          if let Ok(_) = prost::Message::encode(&client.packages, &mut self.proto_buffer) {
+            let slice = self.proto_buffer.as_slice();
+            let uint8 = Uint8ArraySlice::from_data(env, slice)?;
+            object.set_property(key, uint8)?;
+          }
         }
       }
     }

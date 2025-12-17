@@ -12,26 +12,21 @@ pub struct Client {
   pub input: Input,
 }
 
-pub struct NetworkGroup {
-  pub area_id: u32,
-  pub world_id: u32,
-  pub clients: HashMap<u32, Client>,
-  pub packages: Packages,
-}
-
 pub struct NetworkBus {
-  pub clients: HashMap<i64, Client>,
+  pub direct_clients: HashMap<i64, Client>,
+  pub area_clients: HashMap<(String, u64), Packages>,
 }
 
 impl NetworkBus {
   pub fn new() -> Self {
     Self {
-      clients: HashMap::new(),
+      direct_clients: HashMap::new(),
+      area_clients: HashMap::new(),
     }
   }
 
   pub fn add_client(&mut self, player_id: i64) {
-    self.clients.insert(
+    self.direct_clients.insert(
       player_id,
       Client {
         input: Input::new(),
@@ -41,27 +36,39 @@ impl NetworkBus {
   }
 
   pub fn remove_client(&mut self, player_id: i64) {
-    if let Some(_) = self.clients.get(&player_id) {
-      self.clients.remove(&player_id);
+    if let Some(_) = self.direct_clients.get(&player_id) {
+      self.direct_clients.remove(&player_id);
     }
   }
 
   pub fn accept_input(&mut self, id: i64, input: &Input) {
-    if let Some(client) = self.clients.get_mut(&id) {
+    if let Some(client) = self.direct_clients.get_mut(&id) {
       client.input = input.clone();
     }
   }
 
   pub fn add_global_package(&mut self, package: Kind) {
-    for client in self.clients.values_mut() {
+    for client in self.direct_clients.values_mut() {
       client.packages.items.push(Package {
         kind: Some(package.clone()),
       });
     }
   }
 
+  pub fn add_area_package(&mut self, name: String, area: u64, package: Kind) {
+    if let Some(area) = self.area_clients.get_mut(&(name.clone(), area)) {
+      area.items.push(Package {
+        kind: Some(package),
+      });
+    } else {
+      self
+        .area_clients
+        .insert((name, area), Packages { items: Vec::new() });
+    }
+  }
+
   pub fn add_direct_package(&mut self, id: i64, package: Kind) {
-    if let Some(client) = self.clients.get_mut(&id) {
+    if let Some(client) = self.direct_clients.get_mut(&id) {
       client.packages.items.push(Package {
         kind: Some(package),
       });
@@ -69,7 +76,7 @@ impl NetworkBus {
   }
 
   pub fn clear_packages(&mut self) {
-    for (_, client) in self.clients.iter_mut() {
+    for (_, client) in self.direct_clients.iter_mut() {
       client.packages.items.clear();
     }
   }
