@@ -1,11 +1,15 @@
 use crate::bus::EventBus;
+use crate::resources::assets::entity::EntityWrapper;
+use crate::resources::assets::hero::HeroWrapper;
+use crate::resources::entity::Entity;
 use crate::resources::player::Player;
 use rand::rngs::ThreadRng;
 use rand::Rng;
 use std::cell::RefCell;
 
-mod area;
+pub mod area;
 pub mod assets;
+pub mod effect;
 pub mod entity;
 pub mod player;
 pub mod utils;
@@ -27,6 +31,7 @@ pub struct Boundary {
 
 #[derive(Clone, Copy)]
 pub struct EntityProps {
+  pub id: Option<u64>,
   pub type_id: u64,
   pub radius: f64,
   pub speed: f64,
@@ -40,6 +45,20 @@ pub struct EntityUpdateProps<'a> {
   pub event_bus: &'a mut EventBus,
 }
 
+pub struct EffectUpdateProps<'a> {
+  pub delta: i64,
+  pub time_fix: f64,
+  pub caster: &'a EntityWrapper,
+  pub target: &'a HeroWrapper,
+  pub boundary: Boundary,
+}
+
+pub struct PartEffectUpdateProps<'a> {
+  pub delta: i64,
+  pub time_fix: f64,
+  pub target: &'a Player,
+}
+
 pub struct UpdateProps {
   pub delta: i64,
   pub time_fix: f64,
@@ -50,6 +69,13 @@ pub struct PlayerUpdateProps<'a> {
   pub time_fix: f64,
   pub players: Vec<&'a Player>,
   pub event_bus: &'a mut EventBus,
+}
+
+pub struct EffectProps<'a> {
+  pub delta: i64,
+  pub time_fix: f64,
+  pub target: &'a mut Player,
+  pub caster: &'a mut Entity,
 }
 
 #[derive(Clone, Copy)]

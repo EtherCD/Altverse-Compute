@@ -9,16 +9,10 @@
     {
       "enemies": [
         {
-          "types": ["wall"],
-          "radius": 10,
-          "speed": 5,
-          "count": 10
-        },
-        {
-          "types": ["sniper", "homing", "bee"],
+          "types": ["slower"],
           "radius": 25,
-          "speed": 5,
-          "count": 20
+          "speed": 1,
+          "count": 10
         }
       ],
       "w": 1920,

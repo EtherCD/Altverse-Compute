@@ -1,6 +1,6 @@
 <div align="center">
   <img src="./misc/logotype.svg" width=400/>
-  <p>Rust game logic for the Altverse game</p>
+  <p>An Rust game logic for the Altverse game</p>
 </div>
 
 # Usage

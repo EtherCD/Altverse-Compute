@@ -4,8 +4,9 @@ use crate::resources::utils::vector::Vector;
 use crate::resources::{distance, random, Boundary, EntityProps, EntityUpdateProps};
 use std::f32::consts::PI;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Entity {
+  pub id: u64,
   pub type_id: u64,
   pub radius: f64,
   pub speed: f64,
@@ -28,6 +29,10 @@ impl Entity {
   pub fn new(props: EntityProps) -> Self {
     let angle = random(0.0, 1.0);
     Self {
+      id: match props.id {
+        Some(id) => id,
+        _ => 0,
+      },
       type_id: props.type_id,
       radius: props.radius,
       speed: props.speed,

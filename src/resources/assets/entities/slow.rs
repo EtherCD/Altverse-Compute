@@ -1,3 +1,4 @@
+use crate::bus::PlayerEvent;
 use crate::proto::PackedEntity;
 use crate::resources::assets::entities::EntityLogic;
 use crate::resources::assets::hero::HeroWrapper;
@@ -8,15 +9,20 @@ use crate::resources::{distance, AdditionalEntityProps, EntityProps, EntityUpdat
 pub struct Slow {
   entity: Entity,
   aura: f64,
+  players_in_aura: Vec<i64>,
 }
 
 impl Slow {
   pub fn new(props: EntityProps, _: AdditionalEntityProps) -> Self {
     let mut entity = Entity::new(props);
-    entity.type_id = 0;
+    entity.type_id = 11;
+    entity.state = 1;
+    entity.state_metadata = 150.0;
+    entity.aura = 150.0;
     Self {
       entity,
       aura: 150.0,
+      players_in_aura: Vec::new(),
     }
   }
 }
@@ -25,10 +31,28 @@ impl EntityLogic for Slow {
   fn update(&mut self, props: &mut EntityUpdateProps) {
     self.entity.update(props);
     self.entity.collide();
+
+    for player_id in self.players_in_aura.iter() {
+      props.event_bus.players_events.push(PlayerEvent::AddEffect {
+        player_id: *player_id,
+        effect_id: 0,
+        caster_id: self.entity.id,
+      })
+    }
+    self.players_in_aura.clear();
   }
 
   fn interact<'a>(&mut self, hero: &mut HeroWrapper) {
     let player = hero.player_mut();
+
+    if distance(
+      player.pos.x - self.entity.pos.x,
+      player.pos.y - self.entity.pos.y,
+    ) <= self.entity.aura + player.radius
+    {
+      self.players_in_aura.push(player.id);
+    }
+
     if !self.entity.harmless
       && player.pos.x > -player.radius
       && player.pos.x - player.radius < self.entity.boundary.w
@@ -41,11 +65,6 @@ impl EntityLogic for Slow {
         {
           player.knock();
         }
-        if distance(
-          player.pos.x - self.entity.pos.x,
-          player.pos.y - self.entity.pos.y,
-        ) <= self.entity.aura + player.radius
-        {}
       }
     }
   }

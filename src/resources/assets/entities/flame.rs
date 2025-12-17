@@ -28,6 +28,7 @@ impl EntityLogic for Flame {
     if self.timer >= 32.0 * ((self.entity.radius * 2.0) / self.entity.speed) {
       let mut trail = FlameTrail::new(
         EntityProps {
+          id: None,
           type_id: 19,
           radius: self.entity.radius,
           speed: 0.0,

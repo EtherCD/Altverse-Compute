@@ -9,6 +9,7 @@ pub mod fade;
 pub mod flame;
 pub mod flamesniper;
 pub mod homing;
+pub mod homingsniper;
 pub mod immune;
 pub mod normal;
 pub mod slow;

@@ -9,7 +9,7 @@ use crate::proto::{
 use crate::resources::assets::hero::HeroWrapper;
 use crate::resources::player::Player;
 use crate::resources::world::World;
-use crate::resources::{distance, EntityUpdateProps, UpdateProps};
+use crate::resources::{distance, EffectUpdateProps, EntityUpdateProps, UpdateProps};
 use std::collections::HashMap;
 
 pub struct WorldsManager {
@@ -52,6 +52,7 @@ impl WorldsManager {
       for area in world.areas.iter_mut() {
         self.old_entities = area.get_packed_entities();
         event_bus.entities_to_spawn.clear();
+        let boundary = area.as_boundary();
 
         let mut entity_update = EntityUpdateProps {
           delta: props.delta,
@@ -59,6 +60,22 @@ impl WorldsManager {
           players: area.get_players_vec(&players),
           event_bus,
         };
+
+        for (id, effects) in players_manager.effects.iter_mut() {
+          for (_, effect) in effects.iter_mut() {
+            if let Some(target) = players.get(&effect.effect().target_id) {
+              if let Some(caster) = area.entities.get_mut(&effect.effect().caster_id) {
+                effect.update(&EffectUpdateProps {
+                  delta: props.delta,
+                  time_fix: props.time_fix,
+                  caster,
+                  target,
+                  boundary,
+                });
+              }
+            }
+          }
+        }
 
         area.entities.retain(|id, entity| {
           if entity.entity().to_remove {
@@ -154,7 +171,7 @@ impl WorldsManager {
     }
   }
 
-  pub fn prepare_warps<'a>(&mut self, players: &HashMap<i64, HeroWrapper>) -> HashMap<i64, Change> {
+  pub fn prepare_warps(&mut self, players: &HashMap<i64, HeroWrapper>) -> HashMap<i64, Change> {
     let mut changes: HashMap<i64, Change> = HashMap::new();
 
     for (id, hero) in players.iter() {

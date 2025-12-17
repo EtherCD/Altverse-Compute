@@ -1,3 +1,4 @@
+pub mod effect;
 pub mod effects;
 mod entities;
 pub mod entity;

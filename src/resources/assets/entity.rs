@@ -5,8 +5,10 @@ use crate::resources::assets::entities::fade::Fade;
 use crate::resources::assets::entities::flame::{Flame, FlameTrail};
 use crate::resources::assets::entities::flamesniper::{FlameBullet, FlameSniper};
 use crate::resources::assets::entities::homing::Homing;
+use crate::resources::assets::entities::homingsniper::{HomingBullet, HomingSniper};
 use crate::resources::assets::entities::immune::Immune;
 use crate::resources::assets::entities::normal::Normal;
+use crate::resources::assets::entities::slow::Slow;
 use crate::resources::assets::entities::sniper::{Bullet, Sniper};
 use crate::resources::assets::entities::wall::Wall;
 use crate::resources::assets::entities::EntityLogic;
@@ -31,6 +33,9 @@ macro_rules! entity_dispatch {
       EntityWrapper::Bullet(v) => v.$method($($arg),*),
       EntityWrapper::Bee(v) => v.$method($($arg),*),
       EntityWrapper::Homing(v) => v.$method($($arg),*),
+      EntityWrapper::HomingSniper(v) => v.$method($($arg),*),
+      EntityWrapper::HomingBullet(v) => v.$method($($arg),*),
+      EntityWrapper::Slow(v) => v.$method($($arg),*),
     }
   };
 }
@@ -50,6 +55,9 @@ pub enum EntityWrapper {
   Bullet(Bullet),
   Bee(Bee),
   Homing(Homing),
+  HomingSniper(HomingSniper),
+  HomingBullet(HomingBullet),
+  Slow(Slow),
 }
 
 impl EntityWrapper {
@@ -71,6 +79,10 @@ impl EntityWrapper {
       "homing" => Ok(EntityWrapper::Homing(Homing::new(*props, additional))),
       "bee" => Ok(EntityWrapper::Bee(Bee::new(*props, additional))),
       "sniper" => Ok(EntityWrapper::Sniper(Sniper::new(*props, additional))),
+      "homing_sniper" => Ok(EntityWrapper::HomingSniper(HomingSniper::new(
+        *props, additional,
+      ))),
+      "slower" => Ok(EntityWrapper::Slow(Slow::new(*props, additional))),
       _ => Err(Error::new(
         Status::InvalidArg,
         "Unknown enemy type: ".to_string() + name,

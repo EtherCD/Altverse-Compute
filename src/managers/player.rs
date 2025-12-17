@@ -1,6 +1,7 @@
 use crate::bus::{EventBus, NetworkBus};
 use crate::proto::package::Kind;
 use crate::proto::{PackedPlayer, PartialPlayer, Players, UpdatePlayersMap};
+use crate::resources::assets::effect::PlayerEffectWrapper;
 use crate::resources::assets::hero::HeroWrapper;
 use crate::resources::utils::join::JoinProps;
 use crate::resources::world::World;
@@ -14,6 +15,8 @@ pub struct PlayersManager {
   pub end_packages: HashMap<u32, PackedPlayer>,
   pub players_diff: HashMap<u32, PartialPlayer>,
   pub players_to_remove: Vec<u32>,
+  pub effects: HashMap<i64, HashMap<u64, PlayerEffectWrapper>>,
+  pub effects_to_remove: Vec<u64>,
 }
 
 impl PlayersManager {
@@ -24,6 +27,8 @@ impl PlayersManager {
       end_packages: HashMap::new(),
       players_diff: HashMap::new(),
       players_to_remove: Vec::new(),
+      effects_to_remove: Vec::new(),
+      effects: HashMap::new(),
     }
   }
 
@@ -117,6 +122,17 @@ impl PlayersManager {
   ) {
     let players_clone = &self.players.clone();
 
+    for (id, effects) in self.effects.iter_mut() {
+      effects.retain(|id, effect_w| {
+        if effect_w.effect().to_remove {
+          effect_w.disable(self.players.get_mut(&effect_w.effect().target_id).unwrap());
+          false
+        } else {
+          true
+        }
+      });
+    }
+
     for (id, hero) in self.players.iter_mut() {
       let player = hero.player();
       if let Some(worlds) = worlds.get_mut(&player.world) {
@@ -137,7 +153,32 @@ impl PlayersManager {
       }
     }
 
-    event_bus.process_players_events(&mut self.players);
+    event_bus.process_players_events(self);
+  }
+
+  pub fn add_player_effect(&mut self, effect: &mut PlayerEffectWrapper) {
+    if !self.has_player_effect(effect.effect_id(), effect.effect().target_id) {
+      if let Some(player) = self.players.get_mut(&effect.effect().target_id) {
+        if let Some(effects) = self.effects.get_mut(&(effect.effect().target_id as i64)) {
+          effect.enable(player);
+          effects.insert(effect.effect_id(), effect.clone());
+        } else {
+          let mut effects: HashMap<u64, PlayerEffectWrapper> = HashMap::new();
+          effect.enable(player);
+          effects.insert(effect.effect_id(), effect.clone());
+          self.effects.insert(effect.effect().target_id, effects);
+        }
+      }
+    }
+  }
+
+  pub fn has_player_effect(&mut self, self_id: u64, target_id: i64) -> bool {
+    if let Some(effects) = self.effects.get(&target_id) {
+      if let Some(_) = effects.get(&self_id) {
+        return true;
+      }
+    }
+    false
   }
 
   pub fn check_players_to_remove(&mut self) -> Vec<u32> {

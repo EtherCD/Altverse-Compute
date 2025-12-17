@@ -34,7 +34,6 @@ impl Area {
     self.players_id.retain(|&item| item != id);
     if self.players_id.len() == 0 {
       self.entities.clear();
-      self.next_id = 0;
     }
   }
 
@@ -49,9 +48,11 @@ impl Area {
   }
 
   fn init(&mut self) {
+    self.next_id = 0;
     if self.raw_area.enemies.len() != 0 {
       for entity in &self.raw_area.enemies {
         let props = EntityProps {
+          id: Some(self.next_id),
           type_id: 0,
           radius: entity.radius,
           speed: entity.speed,
@@ -84,8 +85,13 @@ impl Area {
   }
 
   pub fn add_entity(&mut self, entity: EntityWrapper) -> u64 {
+    if self.next_id > 100_000 {
+      self.next_id = 0;
+    }
     self.next_id += 1;
-    self.entities.insert(self.next_id, entity);
+    let mut entity_clone = entity.clone();
+    entity_clone.entity_mut().id = self.next_id;
+    self.entities.insert(self.next_id, entity_clone);
     self.next_id
   }
 

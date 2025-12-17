@@ -1,7 +1,8 @@
+use crate::managers::player::PlayersManager;
 use crate::proto::package::Kind;
 use crate::proto::{Package, Packages};
+use crate::resources::assets::effect::PlayerEffectWrapper;
 use crate::resources::assets::entity::EntityWrapper;
-use crate::resources::assets::hero::HeroWrapper;
 use crate::resources::utils::input::Input;
 use crate::resources::utils::vector::Vector;
 use std::collections::HashMap;
@@ -9,6 +10,13 @@ use std::collections::HashMap;
 pub struct Client {
   pub packages: Packages,
   pub input: Input,
+}
+
+pub struct NetworkGroup {
+  pub area_id: u32,
+  pub world_id: u32,
+  pub clients: HashMap<u32, Client>,
+  pub packages: Packages,
 }
 
 pub struct NetworkBus {
@@ -69,7 +77,15 @@ impl NetworkBus {
 
 #[derive(Clone)]
 pub enum PlayerEvent {
-  ResPlayerAndMove { player_id: i64, pos: Vector },
+  ResPlayerAndMove {
+    player_id: i64,
+    pos: Vector,
+  },
+  AddEffect {
+    player_id: i64,
+    effect_id: u64,
+    caster_id: u64,
+  },
 }
 
 pub struct EventBus {
@@ -95,17 +111,30 @@ impl EventBus {
       .push(PlayerEvent::ResPlayerAndMove { player_id, pos });
   }
 
-  pub fn process_players_events(&mut self, players: &mut HashMap<i64, HeroWrapper>) {
+  pub fn process_players_events(&mut self, manager: &mut PlayersManager) {
     for event in self.players_events.iter() {
       match event {
         PlayerEvent::ResPlayerAndMove { player_id, pos } => {
+          let mut players = &mut manager.players;
           if let Some(player) = players.get_mut(player_id) {
             player.res();
-            // player.player_mut().pos.x = pos.x;
-            // player.player_mut().pos.y = pos.y;
+          }
+        }
+        PlayerEvent::AddEffect {
+          effect_id,
+          player_id,
+          caster_id,
+        } => {
+          if let Some(hero) = manager.players.get(player_id) {
+            // if !manager.has_player_effect(*effect_id, *player_id) {
+            if let Ok(effect) = &mut PlayerEffectWrapper::new(*effect_id, hero, *caster_id) {
+              manager.add_player_effect(effect);
+            }
+            // }
           }
         }
       }
     }
+    self.players_events.clear();
   }
 }

@@ -100,6 +100,11 @@ impl Player {
         self.to_delete = true;
       }
     }
+    //
+    // for effect in self.effects.clone().values_mut() {
+    //   effect.disable(self);
+    // }
+    // self.effects.clear();
   }
 
   fn regenerate_energy(&mut self, delta: i64) {
@@ -171,6 +176,7 @@ impl Player {
       self.pos.y = boundary.y + boundary.h - self.radius;
     }
   }
+
   pub fn pack(&self) -> PackedPlayer {
     PackedPlayer {
       id: self.id as u32,
