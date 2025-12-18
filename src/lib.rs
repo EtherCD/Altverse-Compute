@@ -141,7 +141,7 @@ impl ComputeEngine {
 
     for (key, value) in self.network_bus.area_clients.iter_mut() {
       let mut proto_buffer = Vec::new();
-      if let Ok(_) = prost::Message::encode(&value.clone(), &mut proto_buffer) {
+      if let Ok(_) = prost::Message::encode(value, &mut proto_buffer) {
         built_areas.insert(key.clone(), proto_buffer);
       }
       value.items.clear();

@@ -9,10 +9,10 @@
     {
       "enemies": [
         {
-          "types": ["flame"],
-          "radius": 25,
+          "types": ["flame_sniper"],
+          "radius": 10,
           "speed": 5,
-          "count": 100
+          "count": 10
         }
       ],
       "w": 1920,

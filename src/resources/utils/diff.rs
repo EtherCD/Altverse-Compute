@@ -4,7 +4,7 @@ use crate::proto::{PackedEntity, PackedPlayer, PartialEntity, PartialPlayer};
 macro_rules! diff_field {
   ($self:ident, $new:ident, $field:ident) => {{
     if $self.$field != $new.$field {
-      Some($new.$field)
+      Some($new.$field.try_into().unwrap())
     } else {
       None
     }
@@ -13,6 +13,19 @@ macro_rules! diff_field {
   ($self:ident, $new:ident, $field:ident, clone) => {{
     if $self.$field != $new.$field {
       Some($new.$field.clone())
+    } else {
+      None
+    }
+  }};
+}
+
+#[macro_export]
+macro_rules! diff_delta {
+  ($self:ident, $new:ident, $field:ident) => {{
+    let old_val: i32 = $self.$field;
+    let new_val: i32 = $new.$field;
+    if old_val != new_val {
+      Some((old_val - new_val) as i32)
     } else {
       None
     }
@@ -37,8 +50,8 @@ impl PackedEntity {
 
     (
       PartialEntity {
-        x: diff_field!(self, new, x),
-        y: diff_field!(self, new, y),
+        x: diff_delta!(self, new, x),
+        y: diff_delta!(self, new, y),
         radius: diff_field!(self, new, radius),
         harmless: diff_field!(self, new, harmless),
         state: diff_field!(self, new, state),
@@ -72,8 +85,8 @@ impl PackedPlayer {
 
     (
       PartialPlayer {
-        x: diff_field!(self, new, x),
-        y: diff_field!(self, new, y),
+        x: diff_delta!(self, new, x),
+        y: diff_delta!(self, new, y),
         radius: diff_field!(self, new, radius),
         speed: diff_field!(self, new, speed),
         energy: diff_field!(self, new, energy),

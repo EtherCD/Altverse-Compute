@@ -4,8 +4,8 @@ package game;
 
 message PackedEntity {
   uint32 type_id = 2;
-  uint32 x = 3;
-  uint32 y = 4;
+  sint32 x = 3;
+  sint32 y = 4;
   uint32 radius = 5;
   bool harmless = 6;
   uint32 state = 7;
@@ -16,8 +16,8 @@ message PackedEntity {
 message PackedPlayer {
   string name = 1;
   uint32 id = 2;
-  sfixed32 x = 3;
-  sfixed32 y = 4;
+  sint32 x = 3;
+  sint32 y = 4;
   uint32 radius = 5;
   uint32 speed = 6;
   uint32 energy = 7;
@@ -32,8 +32,8 @@ message PackedPlayer {
 }
 
 message PartialEntity {
-  optional uint32 x = 2;
-  optional uint32 y = 3;
+  optional sint32 x = 2;
+  optional sint32 y = 3;
   optional uint32 radius = 4;
   optional bool harmless = 5;
   optional uint32 state = 7;
@@ -42,8 +42,8 @@ message PartialEntity {
 }
 
 message PartialPlayer {
-  optional sfixed32 x = 3;
-  optional sfixed32 y = 4;
+  optional sint32 x = 3;
+  optional sint32 y = 4;
   optional uint32 radius = 5;
   optional uint32 speed = 6;
   optional uint32 energy = 7;
