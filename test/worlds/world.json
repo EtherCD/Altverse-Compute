@@ -9,14 +9,14 @@
     {
       "enemies": [
         {
-          "types": ["flame_sniper"],
+          "types": ["fade"],
           "radius": 10,
           "speed": 5,
-          "count": 10
+          "count": 100
         }
       ],
       "w": 1920,
-      "h": 480
+      "h": 960
     },
     {
       "enemies": [

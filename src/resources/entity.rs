@@ -29,10 +29,7 @@ impl Entity {
   pub fn new(props: EntityProps) -> Self {
     let angle = random(0.0, 1.0);
     Self {
-      id: match props.id {
-        Some(id) => id,
-        _ => 0,
-      },
+      id: props.id,
       type_id: props.type_id,
       radius: props.radius,
       speed: props.speed,
@@ -119,13 +116,13 @@ impl Entity {
   pub fn pack(&self) -> PackedEntity {
     PackedEntity {
       type_id: self.type_id as u32,
-      x: (self.pos.x * 10.0).round() as i32,
-      y: (self.pos.y * 10.0).round() as i32,
-      radius: (self.radius * 10.0).round().abs() as u32,
+      x: (self.pos.x * 2.0).round() as i32,
+      y: (self.pos.y * 2.0).round() as i32,
+      radius: (self.radius * 2.0).round().abs() as u32,
       harmless: self.harmless,
       state: self.state as u32,
-      state_metadata: (self.state_metadata * 10.0).round().abs() as u32,
-      alpha: (self.alpha * 100.0).round().abs() as u32,
+      state_metadata: (self.state_metadata * 2.0).round().abs() as u32,
+      alpha: (self.alpha * 20.0).round().abs() as u32,
     }
   }
 }

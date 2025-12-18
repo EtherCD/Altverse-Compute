@@ -56,7 +56,7 @@ impl EntityLogic for HomingSniper {
 
           let mut bullet = HomingBullet::new(
             EntityProps {
-              id: None,
+              id: 1,
               type_id: 3,
               radius: self.entity.radius / 2.0,
               speed: 10.0,

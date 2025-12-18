@@ -53,7 +53,7 @@ impl EntityLogic for FlameSniper {
 
           let mut bullet = FlameBullet::new(
             EntityProps {
-              id: None,
+              id: 1,
               type_id: 20,
               radius: self.entity.radius / 2.0,
               speed: 10.0,
@@ -143,7 +143,7 @@ impl EntityLogic for FlameBullet {
     if self.timer >= 32.0 * ((self.entity.radius * 2.0) / self.entity.speed) {
       let mut trail = FlameTrail::new(
         EntityProps {
-          id: None,
+          id: 1,
           type_id: 19,
           radius: self.entity.radius,
           speed: 0.0,

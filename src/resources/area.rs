@@ -47,23 +47,33 @@ impl Area {
     packed_entities
   }
 
+  pub fn get_packed_entities_vec(&self) -> Vec<PackedEntity> {
+    let mut packed_entities: Vec<PackedEntity> = Vec::new();
+
+    for (id, entity) in self.entities.iter() {
+      packed_entities.push(entity.pack());
+    }
+
+    packed_entities
+  }
+
   fn init(&mut self) {
     self.next_id = 0;
     if self.raw_area.enemies.len() != 0 {
       for entity in &self.raw_area.enemies {
-        let props = EntityProps {
-          id: Some(self.next_id),
-          type_id: 0,
-          radius: entity.radius,
-          speed: entity.speed,
-          boundary: Boundary {
-            x: 0.0,
-            y: 0.0,
-            w: self.raw_area.w,
-            h: self.raw_area.h,
-          },
-        };
         for num in 0..entity.count {
+          let props = EntityProps {
+            id: self.next_id,
+            type_id: 0,
+            radius: entity.radius,
+            speed: entity.speed,
+            boundary: Boundary {
+              x: 0.0,
+              y: 0.0,
+              w: self.raw_area.w,
+              h: self.raw_area.h,
+            },
+          };
           let type_name = entity
             .types
             .get(random(0.0, entity.types.len() as f64 - 1.0).round() as usize)

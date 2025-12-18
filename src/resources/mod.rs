@@ -31,7 +31,7 @@ pub struct Boundary {
 
 #[derive(Clone, Copy)]
 pub struct EntityProps {
-  pub id: Option<u64>,
+  pub id: u64,
   pub type_id: u64,
   pub radius: f64,
   pub speed: f64,

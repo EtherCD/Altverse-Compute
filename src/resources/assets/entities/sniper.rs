@@ -53,7 +53,7 @@ impl EntityLogic for Sniper {
 
           let mut bullet = Bullet::new(
             EntityProps {
-              id: None,
+              id: 1,
               type_id: 3,
               radius: self.entity.radius / 2.0,
               speed: 10.0,
