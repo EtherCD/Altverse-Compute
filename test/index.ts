@@ -152,7 +152,7 @@ const tick = () => {
   }
   // console.time('Compute Engine')
   const packages = engine.update() as Record<string, Buffer>
-  // console.timeEnd('Compute Engine')
+  // console.timeEnd('Compute Engine')/**/
 
   for (const [id, client] of clients) {
     let pkg = packages[id]

@@ -59,8 +59,8 @@ impl PackedEntity {
 
     (
       PartialEntity {
-        x: diff_delta!(self, new, x),
-        y: diff_delta!(self, new, y),
+        x: diff_field!(self, new, x),
+        y: diff_field!(self, new, y),
         radius: diff_field!(self, new, radius),
         harmless: diff_field!(self, new, harmless),
         state: diff_field!(self, new, state),
@@ -94,8 +94,8 @@ impl PackedPlayer {
 
     (
       PartialPlayer {
-        x: diff_delta!(self, new, x),
-        y: diff_delta!(self, new, y),
+        x: diff_field!(self, new, x),
+        y: diff_field!(self, new, y),
         radius: diff_field!(self, new, radius),
         speed: diff_field!(self, new, speed),
         energy: diff_field!(self, new, energy),
