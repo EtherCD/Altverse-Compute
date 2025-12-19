@@ -8,6 +8,7 @@ use crate::resources::assets::entities::homing::Homing;
 use crate::resources::assets::entities::homingsniper::{HomingBullet, HomingSniper};
 use crate::resources::assets::entities::immune::Immune;
 use crate::resources::assets::entities::normal::Normal;
+use crate::resources::assets::entities::sizer::Sizer;
 use crate::resources::assets::entities::slow::Slow;
 use crate::resources::assets::entities::sniper::{Bullet, Sniper};
 use crate::resources::assets::entities::wall::Wall;
@@ -36,6 +37,7 @@ macro_rules! entity_dispatch {
       EntityWrapper::HomingSniper(v) => v.$method($($arg),*),
       EntityWrapper::HomingBullet(v) => v.$method($($arg),*),
       EntityWrapper::Slow(v) => v.$method($($arg),*),
+      EntityWrapper::Sizer(v) => v.$method($($arg),*),
     }
   };
 }
@@ -58,6 +60,7 @@ pub enum EntityWrapper {
   HomingSniper(HomingSniper),
   HomingBullet(HomingBullet),
   Slow(Slow),
+  Sizer(Sizer),
 }
 
 impl EntityWrapper {
@@ -83,6 +86,7 @@ impl EntityWrapper {
         *props, additional,
       ))),
       "slower" => Ok(EntityWrapper::Slow(Slow::new(*props, additional))),
+      "sizer" => Ok(EntityWrapper::Sizer(Sizer::new(*props, additional))),
       _ => Err(Error::new(
         Status::InvalidArg,
         "Unknown enemy type: ".to_string() + name,

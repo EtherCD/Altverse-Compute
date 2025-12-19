@@ -12,6 +12,7 @@ pub mod homing;
 pub mod homingsniper;
 pub mod immune;
 pub mod normal;
+pub mod sizer;
 pub mod slow;
 pub mod sniper;
 pub mod wall;

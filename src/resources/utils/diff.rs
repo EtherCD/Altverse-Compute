@@ -30,6 +30,15 @@ macro_rules! diff_delta {
       None
     }
   }};
+  ($self:ident, $new:ident, $field:ident, $typ:ident) => {{
+    let old_val: $typ = $self.$field;
+    let new_val: $typ = $new.$field;
+    if old_val != new_val {
+      Some((old_val - new_val) as $typ)
+    } else {
+      None
+    }
+  }};
 }
 
 impl PackedEntity {
@@ -50,8 +59,8 @@ impl PackedEntity {
 
     (
       PartialEntity {
-        x: diff_field!(self, new, x),
-        y: diff_field!(self, new, y),
+        x: diff_delta!(self, new, x),
+        y: diff_delta!(self, new, y),
         radius: diff_field!(self, new, radius),
         harmless: diff_field!(self, new, harmless),
         state: diff_field!(self, new, state),
@@ -85,8 +94,8 @@ impl PackedPlayer {
 
     (
       PartialPlayer {
-        x: diff_field!(self, new, x),
-        y: diff_field!(self, new, y),
+        x: diff_delta!(self, new, x),
+        y: diff_delta!(self, new, y),
         radius: diff_field!(self, new, radius),
         speed: diff_field!(self, new, speed),
         energy: diff_field!(self, new, energy),

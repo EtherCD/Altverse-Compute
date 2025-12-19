@@ -9,6 +9,7 @@ use crate::resources::utils::join::JoinProps;
 use crate::resources::UpdateProps;
 use chrono::Utc;
 use lazy_static::lazy_static;
+use lz4_flex::frame::FrameEncoder;
 use napi::bindgen_prelude::Function;
 use napi::bindgen_prelude::Null;
 use napi::bindgen_prelude::{JsObjectValue, Object, Uint8ArraySlice};
@@ -155,16 +156,24 @@ impl ComputeEngine {
         if let Some(buffer) = built_areas.get(&(player.world.clone(), player.area)) {
           self.proto_buffer = buffer.clone();
           if let Ok(_) = prost::Message::encode(&client.packages, &mut self.proto_buffer) {
-            let slice = self.proto_buffer.as_slice();
-            let uint8 = Uint8ArraySlice::from_data(env, slice)?;
-            object.set_property(key, uint8)?;
+            let mut slice = self.proto_buffer.as_slice();
+            let mut compressor = FrameEncoder::new(Vec::new());
+            io::copy(&mut slice, &mut compressor)?;
+            if let Ok(buffer) = compressor.finish() {
+              let uint8 = Uint8ArraySlice::from_data(env, buffer)?;
+              object.set_property(key, uint8)?;
+            }
           }
         } else {
           self.proto_buffer = Vec::new();
           if let Ok(_) = prost::Message::encode(&client.packages, &mut self.proto_buffer) {
-            let slice = self.proto_buffer.as_slice();
-            let uint8 = Uint8ArraySlice::from_data(env, slice)?;
-            object.set_property(key, uint8)?;
+            let mut slice = self.proto_buffer.as_slice();
+            let mut compressor = FrameEncoder::new(Vec::new());
+            io::copy(&mut slice, &mut compressor)?;
+            if let Ok(buffer) = compressor.finish() {
+              let uint8 = Uint8ArraySlice::from_data(env, buffer)?;
+              object.set_property(key, uint8)?;
+            }
           }
         }
       }

@@ -9,8 +9,8 @@
     {
       "enemies": [
         {
-          "types": ["fade"],
-          "radius": 10,
+          "types": ["normal"],
+          "radius": 50,
           "speed": 5,
           "count": 100
         }
