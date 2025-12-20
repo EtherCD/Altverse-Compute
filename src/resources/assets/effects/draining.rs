@@ -4,33 +4,31 @@ use crate::resources::effect::PlayerEffect;
 use crate::resources::{distance, EffectUpdateProps};
 
 #[derive(Clone, Debug)]
-pub struct PlayerSlow {
-  pub target_speed: f64,
+pub struct PlayerDraining {
   pub effect: PlayerEffect,
 }
 
-impl PlayerSlow {
+impl PlayerDraining {
   pub fn new(target: &HeroWrapper, caster_id: u64) -> Self {
     let player = target.player();
     let mut s = Self {
-      target_speed: player.speed,
-      effect: PlayerEffect::new(0, player.id, caster_id),
+      effect: PlayerEffect::new(1, player.id, caster_id),
     };
-    s.effect.id = 0;
+    s.effect.id = 1;
     s
   }
 }
 
-impl PlayerEffectLogic for PlayerSlow {
+impl PlayerEffectLogic for PlayerDraining {
   fn enable(&mut self, player: &mut HeroWrapper) {
-    player.player_mut().speed = self.target_speed * 0.25;
   }
   fn disable(&self, player: &mut HeroWrapper) {
-    player.player_mut().speed = self.target_speed;
   }
   fn update(&mut self, props: &mut EffectUpdateProps<'_>) {
-    let target = props.target.player();
+    let target = props.target.player_mut();
     let caster = props.caster.entity();
+
+    target.energy -= 16.0 * props.delta  as f64 / 1000.0;
 
     if distance(target.pos.x - caster.pos.x, target.pos.y - caster.pos.y) >= 150.0 + target.radius {
       self.effect.to_remove = true;

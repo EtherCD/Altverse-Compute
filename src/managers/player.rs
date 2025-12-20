@@ -122,8 +122,8 @@ impl PlayersManager {
   ) {
     let players_clone = &self.players.clone();
 
-    for (id, effects) in self.effects.iter_mut() {
-      effects.retain(|id, effect_w| {
+    for (_, effects) in self.effects.iter_mut() {
+      effects.retain(|_, effect_w| {
         if effect_w.effect().to_remove {
           effect_w.disable(self.players.get_mut(&effect_w.effect().target_id).unwrap());
           false

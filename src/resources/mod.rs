@@ -49,7 +49,7 @@ pub struct EffectUpdateProps<'a> {
   pub delta: i64,
   pub time_fix: f64,
   pub caster: &'a EntityWrapper,
-  pub target: &'a HeroWrapper,
+  pub target: &'a mut HeroWrapper,
   pub boundary: Boundary,
 }
 

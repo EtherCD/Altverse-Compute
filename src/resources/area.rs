@@ -50,7 +50,7 @@ impl Area {
   pub fn get_packed_entities_vec(&self) -> Vec<PackedEntity> {
     let mut packed_entities: Vec<PackedEntity> = Vec::new();
 
-    for (id, entity) in self.entities.iter() {
+    for (_, entity) in self.entities.iter() {
       packed_entities.push(entity.pack());
     }
 

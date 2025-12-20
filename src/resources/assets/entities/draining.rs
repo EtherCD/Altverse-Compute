@@ -6,15 +6,15 @@ use crate::resources::entity::Entity;
 use crate::resources::{distance, AdditionalEntityProps, EntityProps, EntityUpdateProps};
 
 #[derive(Clone)]
-pub struct Slow {
+pub struct Draining {
   entity: Entity,
   players_in_aura: Vec<i64>,
 }
 
-impl Slow {
+impl Draining {
   pub fn new(props: EntityProps, _: AdditionalEntityProps) -> Self {
     let mut entity = Entity::new(props);
-    entity.type_id = 11;
+    entity.type_id = 26;
     entity.state = 1;
     entity.state_metadata = 150.0;
     entity.aura = 150.0;
@@ -25,7 +25,7 @@ impl Slow {
   }
 }
 
-impl EntityLogic for Slow {
+impl EntityLogic for Draining {
   fn update(&mut self, props: &mut EntityUpdateProps) {
     self.entity.update(props);
     self.entity.collide();
@@ -33,7 +33,7 @@ impl EntityLogic for Slow {
     for player_id in self.players_in_aura.iter() {
       props.event_bus.players_events.push(PlayerEvent::AddEffect {
         player_id: *player_id,
-        effect_id: 0,
+        effect_id: 1,
         caster_id: self.entity.id,
       })
     }

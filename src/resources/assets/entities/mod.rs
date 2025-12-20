@@ -16,6 +16,11 @@ pub mod sizer;
 pub mod slow;
 pub mod sniper;
 pub mod wall;
+pub mod icicle;
+pub mod draining;
+pub mod leaf;
+pub mod cloud;
+pub mod stormcloud;
 
 pub trait EntityLogic {
   fn update(&mut self, props: &mut EntityUpdateProps);

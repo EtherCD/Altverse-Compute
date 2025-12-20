@@ -13,10 +13,15 @@ use crate::resources::assets::entities::slow::Slow;
 use crate::resources::assets::entities::sniper::{Bullet, Sniper};
 use crate::resources::assets::entities::wall::Wall;
 use crate::resources::assets::entities::EntityLogic;
+use crate::resources::assets::entities::cloud::Cloud;
 use crate::resources::assets::hero::HeroWrapper;
 use crate::resources::entity::Entity;
 use crate::resources::{AdditionalEntityProps, EntityProps, EntityUpdateProps};
 use napi::{Error, Status};
+use crate::resources::assets::entities::draining::Draining;
+use crate::resources::assets::entities::icicle::Icicle;
+use crate::resources::assets::entities::leaf::Leaf;
+use crate::resources::assets::entities::stormcloud::StormCloud;
 
 macro_rules! entity_dispatch {
   ($self:expr, $method:ident($($arg:expr),*)) => {
@@ -38,6 +43,11 @@ macro_rules! entity_dispatch {
       EntityWrapper::HomingBullet(v) => v.$method($($arg),*),
       EntityWrapper::Slow(v) => v.$method($($arg),*),
       EntityWrapper::Sizer(v) => v.$method($($arg),*),
+      EntityWrapper::Icicle(v) => v.$method($($arg),*),
+      EntityWrapper::Draining(v) => v.$method($($arg),*),
+      EntityWrapper::Leaf(v) => v.$method($($arg),*),
+      EntityWrapper::Cloud(v) => v.$method($($arg),*),
+      EntityWrapper::StormCloud(v) => v.$method($($arg),*),
     }
   };
 }
@@ -61,6 +71,11 @@ pub enum EntityWrapper {
   HomingBullet(HomingBullet),
   Slow(Slow),
   Sizer(Sizer),
+  Icicle(Icicle),
+  Draining(Draining),
+  Leaf(Leaf),
+  Cloud(Cloud),
+  StormCloud(StormCloud)
 }
 
 impl EntityWrapper {
@@ -87,6 +102,11 @@ impl EntityWrapper {
       ))),
       "slower" => Ok(EntityWrapper::Slow(Slow::new(*props, additional))),
       "sizer" => Ok(EntityWrapper::Sizer(Sizer::new(*props, additional))),
+      "icicle" => Ok(EntityWrapper::Icicle(Icicle::new(*props, additional))),
+      "draining" => Ok(EntityWrapper::Draining(Draining::new(*props, additional))),
+      "leaf" => Ok(EntityWrapper::Leaf(Leaf::new(*props, additional))),
+      "cloud" => Ok(EntityWrapper::Cloud(Cloud::new(*props, additional))),
+      "storm_cloud" => Ok(EntityWrapper::StormCloud(StormCloud::new(*props, additional))),
       _ => Err(Error::new(
         Status::InvalidArg,
         "Unknown enemy type: ".to_string() + name,

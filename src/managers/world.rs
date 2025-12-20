@@ -47,6 +47,7 @@ impl WorldsManager {
     network_bus: &mut NetworkBus,
     event_bus: &mut EventBus,
   ) {
+    let players_clone = &mut players_manager.players.clone();
     let players = &mut players_manager.players;
     for (name, world) in self.worlds.iter_mut() {
       for (index, area) in world.areas.iter_mut().enumerate() {
@@ -57,23 +58,26 @@ impl WorldsManager {
         let mut entity_update = EntityUpdateProps {
           delta: props.delta,
           time_fix: props.time_fix,
-          players: area.get_players_vec(&players),
+          players: area.get_players_vec(&players_clone),
           event_bus,
         };
 
-        for (id, effects) in players_manager.effects.iter_mut() {
+        for (_, effects) in players_manager.effects.iter_mut() {
           for (_, effect) in effects.iter_mut() {
-            if let Some(target) = players.get(&effect.effect().target_id) {
-              if let Some(caster) = area.entities.get_mut(&effect.effect().caster_id) {
-                effect.update(&EffectUpdateProps {
-                  delta: props.delta,
-                  time_fix: props.time_fix,
-                  caster,
-                  target,
-                  boundary,
-                });
+            let target_id = effect.effect().target_id.clone();
+            let caster_id = effect.effect().caster_id.clone();
+
+              if let Some(target) = players.get_mut(&target_id) {
+                if let Some(caster) = area.entities.get_mut(&caster_id) {
+                  effect.update(&mut EffectUpdateProps {
+                    delta: props.delta,
+                    time_fix: props.time_fix,
+                    caster,
+                    target,
+                    boundary,
+                  });
+                }
               }
-            }
           }
         }
 

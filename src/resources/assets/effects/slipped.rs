@@ -4,38 +4,36 @@ use crate::resources::effect::PlayerEffect;
 use crate::resources::{distance, EffectUpdateProps};
 
 #[derive(Clone, Debug)]
-pub struct PlayerSlow {
-  pub target_speed: f64,
+pub struct PlayerSlipped {
   pub effect: PlayerEffect,
+  time: f64,
+  original_speed: f64
 }
 
-impl PlayerSlow {
+impl PlayerSlipped {
   pub fn new(target: &HeroWrapper, caster_id: u64) -> Self {
     let player = target.player();
     let mut s = Self {
-      target_speed: player.speed,
-      effect: PlayerEffect::new(0, player.id, caster_id),
+      effect: PlayerEffect::new(2, player.id, caster_id),
+      time: 100.0,
+      original_speed: player.speed
     };
-    s.effect.id = 0;
     s
   }
 }
 
-impl PlayerEffectLogic for PlayerSlow {
-  fn enable(&mut self, player: &mut HeroWrapper) {
-    player.player_mut().speed = self.target_speed * 0.25;
+impl PlayerEffectLogic for PlayerSlipped {
+  fn enable(&mut self, hero: &mut HeroWrapper) {
+    hero.player_mut().speed = self.original_speed * 2.0;
   }
-  fn disable(&self, player: &mut HeroWrapper) {
-    player.player_mut().speed = self.target_speed;
+  fn disable(&self, hero: &mut HeroWrapper) {
+    hero.player_mut().speed = self.original_speed;
   }
   fn update(&mut self, props: &mut EffectUpdateProps<'_>) {
-    let target = props.target.player();
+    let target = props.target.player_mut();
     let caster = props.caster.entity();
-
-    if distance(target.pos.x - caster.pos.x, target.pos.y - caster.pos.y) >= 150.0 + target.radius {
-      self.effect.to_remove = true;
-    }
-    if target.pos.x - target.radius < 0.0 && target.pos.x > props.boundary.w + target.radius {
+    self.time -= props.delta as f64;
+    if self.time < 0.0 {
       self.effect.to_remove = true;
     }
   }

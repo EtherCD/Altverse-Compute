@@ -4,11 +4,15 @@ use crate::resources::assets::hero::HeroWrapper;
 use crate::resources::effect::PlayerEffect;
 use crate::resources::EffectUpdateProps;
 use napi::{Error, Status};
+use crate::resources::assets::effects::draining::PlayerDraining;
+use crate::resources::assets::effects::slipped::PlayerSlipped;
 
 macro_rules! effect_dispatch {
   ($self:expr, $method:ident($($arg:expr),*)) => {
     match $self {
       PlayerEffectWrapper::Slow(v) => v.$method($($arg),*),
+      PlayerEffectWrapper::Draining(v) => v.$method($($arg),*),
+      PlayerEffectWrapper::Slipped(v) => v.$method($($arg),*)
     }
   };
 }
@@ -16,12 +20,16 @@ macro_rules! effect_dispatch {
 #[derive(Clone, Debug)]
 pub enum PlayerEffectWrapper {
   Slow(PlayerSlow),
+  Draining(PlayerDraining),
+  Slipped(PlayerSlipped),
 }
 
 impl PlayerEffectWrapper {
   pub fn new(name: u64, hero: &HeroWrapper, caster_id: u64) -> Result<Self, Error> {
     match name {
       0 => Ok(PlayerEffectWrapper::Slow(PlayerSlow::new(hero, caster_id))),
+      1 => Ok(PlayerEffectWrapper::Draining(PlayerDraining::new(hero, caster_id))),
+      2 => Ok(PlayerEffectWrapper::Slipped(PlayerSlipped::new(hero, caster_id))),
       _ => Err(Error::new(
         Status::InvalidArg,
         "Unknown effect type: ".to_string() + name.to_string().as_str(),
@@ -29,7 +37,7 @@ impl PlayerEffectWrapper {
     }
   }
 
-  pub fn update(&mut self, props: &EffectUpdateProps) {
+  pub fn update(&mut self, props: &mut EffectUpdateProps) {
     effect_dispatch!(self, update(props));
   }
 
