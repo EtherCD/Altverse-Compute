@@ -8,6 +8,7 @@ use crate::resources::world::World;
 use crate::resources::{PlayerUpdateProps, UpdateProps};
 use napi::{Error, Status};
 use std::collections::HashMap;
+use crate::resources::player::Player;
 
 pub struct PlayersManager {
   pub players: HashMap<i64, HeroWrapper>,
@@ -206,6 +207,10 @@ impl PlayersManager {
   //     }
   //   }
   // }
+
+  pub fn get_player(&self, id: i64) -> Option<&HeroWrapper> {
+    self.players.get(&id)
+  }
 
   pub(crate) fn pack_players(&self) -> HashMap<u32, PackedPlayer> {
     let mut result = HashMap::new();

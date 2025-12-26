@@ -18,6 +18,8 @@ use napi_derive::napi;
 use std::collections::HashMap;
 use std::io;
 use std::sync::Mutex;
+use crate::proto::{Chat, Package, Role};
+use crate::proto::package::Kind;
 
 pub mod proto {
   include!(concat!(env!("OUT_DIR"), "/game.rs"));
@@ -84,6 +86,19 @@ impl ComputeEngine {
       &mut self.network_bus,
     );
     self.network_bus.remove_client(player_id);
+  }
+
+  #[napi]
+  pub fn chat_message(&mut self, content: String, id: u32) {
+    if let Some(hero) = self.players_manager.get_player(id as i64) {
+      self.network_bus.add_global_package(Kind::ChatMessage(Chat {
+        id,
+        content,
+        author:hero.player().name.clone(),
+        role: 0,
+        world: hero.player().world.clone(),
+      }))
+    }
   }
 
   #[napi]

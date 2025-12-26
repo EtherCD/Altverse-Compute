@@ -4,6 +4,7 @@ export declare class ComputeEngine {
   constructor(props: EngineProps)
   join(playerProps: JoinProps): void
   leave(playerId: number): void
+  chatMessage(content: string, id: number): void
   input(id: number, input: Input): void
   onPlayerDeath(callback: (arg: number) => null): void
   update(): object

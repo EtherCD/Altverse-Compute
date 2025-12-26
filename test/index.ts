@@ -40,7 +40,7 @@ engine.onPlayerDeath((id) => {
 // lastId = 100
 
 App()
-  .ws<Client>('/server', {
+  .ws<Client>('/', {
     open: (ws) => {
       const data = ws.getUserData()
       data.id = lastId++
@@ -61,6 +61,8 @@ App()
       for (const i of keys) {
         switch (i) {
           case 'message':
+            console.log(data.message)
+            engine.chatMessage(data.message, client.id)
             break
           case 'keyUp':
             switch (data[i]) {
@@ -130,7 +132,7 @@ App()
       }
     },
   })
-  .listen(8080, () => {
+  .listen(7002, () => {
     console.info(`
    ___   ____                               
   / _ | / / /__  _____ _______ ___   _______
@@ -139,7 +141,7 @@ App()
                                             
 `)
 
-    console.log('Started at 8080')
+    console.log('Started at 7002')
   })
 
 let timeout: NodeJS.Timeout
